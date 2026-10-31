@@ -167,3 +167,4 @@ curl -X POST http://localhost:8000/documents/upload \
 curl http://localhost:8000/health
 # Returns: {"status": "healthy", "database_engine": "postgres|sqlite", "chunks_count": 23, "invoices_count": 80}
 ```
+# finance-rag-assistant
