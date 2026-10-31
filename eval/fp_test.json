@@ -1,0 +1,1 @@
+[{"id":"FP-1","question":"What are the overdue phases?","answer":"Phase 1 (Day 1 to 14 Overdue) sends automated ERP reminder notifications to the vendor relationship manager, and at Phase 2 (Day 15 Overdue) Accounts Payable freezes new purchase order issuance [invoice_terms_policy.pdf, p.1, §4.3].","expected_supported":true,"category":"correct_reworded"}]

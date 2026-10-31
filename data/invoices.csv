@@ -1,0 +1,91 @@
+invoice_id,vendor_name,invoice_date,due_date,amount_inr,status,payment_date,department,description
+INV-2024-001,Blue Dart Express,2024-03-12,2024-04-11,309896.84,Paid,2024-03-18,Operations,Warehousing logistics
+INV-2024-002,Blue Dart Express,2024-01-22,2024-02-21,419331.76,Paid,2024-01-30,Operations,Courier services
+INV-2024-003,Deloitte Advisory,2024-06-29,2024-07-29,253134.05,Overdue,,Finance,Accounting software subscription
+INV-2024-004,AWS Cloud India,2024-01-16,2024-02-15,312252.08,Overdue,,IT,Enterprise software licenses
+INV-2024-005,Reliance Office Supplies,2024-04-10,2024-05-10,220832.23,Paid,2024-04-27,Operations,Packaging material supply
+INV-2024-006,Tata Tech Logistics,2024-01-26,2024-02-25,62109.26,Overdue,,Operations,Office stationery bulk pack
+INV-2024-007,Tata Tech Logistics,2024-06-23,2024-07-23,323417.82,Overdue,,Operations,Packaging material supply
+INV-2024-008,Microsoft India,2024-07-02,2024-08-01,156818.59,Paid,2024-07-16,IT,Network security audit
+INV-2024-009,Tata Tech Logistics,2024-05-10,2024-06-09,43550.48,Overdue,,Operations,Fleet transport charges
+INV-2024-010,Reliance Office Supplies,2024-07-12,2024-08-11,604280.5,Pending,,Operations,Office stationery bulk pack
+INV-2024-011,Zomato Corporate Dining,2024-05-12,2024-06-11,32319.31,Paid,2024-05-27,HR,Recruitment portal subscription
+INV-2024-012,Vanguard Legal Partners,2024-01-29,2024-02-28,81956.71,Paid,2024-02-04,Legal,Contract review retainership
+INV-2024-013,Microsoft India,2024-06-08,2024-07-08,262182.22,Overdue,,IT,Workstation upgrades
+INV-2024-014,Microsoft India,2024-06-27,2024-07-27,44837.45,Overdue,,IT,Enterprise software licenses
+INV-2024-015,Apex Facility Management,2024-03-22,2024-04-21,523219.26,Overdue,,HR,Recruitment portal subscription
+INV-2024-016,Zomato Corporate Dining,2024-02-19,2024-03-20,848007.7,Overdue,,HR,Offsite event management
+INV-2024-017,Vendor ABC Corp,2024-07-07,2024-08-21,224186.59,Pending,,IT,Cloud infrastructure hosting
+INV-2024-018,Tata Tech Logistics,2024-05-29,2024-06-28,847110.43,Paid,2024-06-20,Operations,Packaging material supply
+INV-2024-019,Vendor ABC Corp,2024-03-23,2024-05-07,56568.54,Overdue,,IT,Cloud infrastructure hosting
+INV-2024-020,Microsoft India,2024-01-15,2024-02-14,222827.53,Overdue,,IT,Cloud infrastructure hosting
+INV-2024-021,Vanguard Legal Partners,2024-05-23,2024-06-22,75242.86,Overdue,,Legal,Regulatory filing consultation
+INV-2024-022,Blue Dart Express,2024-03-05,2024-04-04,54136.02,Paid,2024-03-12,Operations,Office stationery bulk pack
+INV-2024-023,Deloitte Advisory,2024-05-19,2024-06-18,61712.4,Paid,2024-06-04,Finance,Accounting software subscription
+INV-2024-024,Apex Facility Management,2024-02-04,2024-03-05,759117.15,Paid,2024-02-24,HR,Recruitment portal subscription
+INV-2024-025,Tata Tech Logistics,2024-05-15,2024-06-14,22656.49,Overdue,,Operations,Courier services
+INV-2024-026,Reliance Office Supplies,2024-03-09,2024-04-08,62347.3,Overdue,,Operations,Office stationery bulk pack
+INV-2024-027,Vanguard Legal Partners,2024-07-04,2024-08-03,45116.36,Overdue,,Legal,Contract review retainership
+INV-2024-028,Dell Technologies India,2024-01-31,2024-03-01,32576.17,Paid,2024-02-23,IT,Network security audit
+INV-2024-029,Deloitte Advisory,2024-06-24,2024-07-24,12596.84,Paid,2024-07-01,Finance,Quarterly internal audit
+INV-2024-030,Vendor ABC Corp,2024-07-04,2024-08-18,282313.45,Pending,,IT,Server maintenance
+INV-2024-031,Deloitte Advisory,2024-06-10,2024-07-10,85237.8,Overdue,,Finance,Quarterly internal audit
+INV-2024-032,Dell Technologies India,2024-05-04,2024-06-03,177213.46,Paid,2024-05-22,IT,Workstation upgrades
+INV-2024-033,Dell Technologies India,2024-02-09,2024-03-10,93685.71,Paid,2024-03-08,IT,Cloud infrastructure hosting
+INV-2024-034,Microsoft India,2024-05-08,2024-06-07,246705.64,Paid,2024-05-18,IT,Cloud infrastructure hosting
+INV-2024-035,Apex Facility Management,2024-05-07,2024-06-06,792832.87,Overdue,,HR,Offsite event management
+INV-2024-036,Deloitte Advisory,2024-01-18,2024-02-17,849465.44,Overdue,,Finance,Quarterly internal audit
+INV-2024-037,Infosys Cloud Services,2024-04-26,2024-05-26,463612.02,Overdue,,IT,Enterprise software licenses
+INV-2024-038,Reliance Office Supplies,2024-05-10,2024-06-09,395864.21,Paid,2024-06-06,Operations,Packaging material supply
+INV-2024-039,Vanguard Legal Partners,2024-01-29,2024-02-28,326047.33,Overdue,,Legal,Regulatory filing consultation
+INV-2024-040,Vendor ABC Corp,2024-05-22,2024-07-06,540212.31,Overdue,,IT,Server maintenance
+INV-2024-041,Deloitte Advisory,2024-03-02,2024-04-01,483332.23,Paid,2024-03-09,Finance,Quarterly internal audit
+INV-2024-042,Blue Dart Express,2024-06-08,2024-07-08,806489.11,Paid,2024-06-22,Operations,Fleet transport charges
+INV-2024-043,Vendor ABC Corp,2024-06-07,2024-07-22,594743.01,Overdue,,IT,Network security audit
+INV-2024-044,Apex Facility Management,2024-03-22,2024-04-21,38077.26,Paid,2024-04-17,HR,Recruitment portal subscription
+INV-2024-045,Blue Dart Express,2024-02-02,2024-03-03,89108.52,Paid,2024-02-16,Operations,Office stationery bulk pack
+INV-2024-046,Zomato Corporate Dining,2024-03-22,2024-04-21,263799.96,Paid,2024-04-01,HR,Employee cafeteria catering
+INV-2024-047,Tata Tech Logistics,2024-06-02,2024-07-02,222521.39,Overdue,,Operations,Fleet transport charges
+INV-2024-048,Blue Dart Express,2024-03-31,2024-04-30,713742.58,Overdue,,Operations,Courier services
+INV-2024-049,Tata Tech Logistics,2024-06-04,2024-07-04,767835.97,Paid,2024-06-18,Operations,Fleet transport charges
+INV-2024-050,Zomato Corporate Dining,2024-06-25,2024-07-25,28898.58,Overdue,,HR,Recruitment portal subscription
+INV-2024-051,Deloitte Advisory,2024-01-28,2024-02-27,781578.49,Paid,2024-02-15,Finance,Statutory tax compliance advisory
+INV-2024-052,Apex Facility Management,2024-06-26,2024-07-26,679483.82,Overdue,,HR,Employee cafeteria catering
+INV-2024-053,Vanguard Legal Partners,2024-01-17,2024-02-16,47498.01,Paid,2024-02-13,Legal,Regulatory filing consultation
+INV-2024-054,Reliance Office Supplies,2024-06-04,2024-07-04,380065.91,Paid,2024-06-13,Operations,Courier services
+INV-2024-055,Vendor ABC Corp,2024-01-25,2024-03-10,800150.57,Overdue,,IT,Server maintenance
+INV-2024-056,Infosys Cloud Services,2024-06-06,2024-07-06,41355.33,Overdue,,IT,Enterprise software licenses
+INV-2024-057,AWS Cloud India,2024-03-15,2024-04-14,88838.4,Overdue,,IT,Network security audit
+INV-2024-058,Reliance Office Supplies,2024-04-09,2024-05-09,653740.53,Overdue,,Operations,Packaging material supply
+INV-2024-059,AWS Cloud India,2024-02-11,2024-03-12,691594.01,Paid,2024-02-17,IT,Enterprise software licenses
+INV-2024-060,Dell Technologies India,2024-04-13,2024-05-13,789246.67,Paid,2024-05-13,IT,Enterprise software licenses
+INV-2024-061,Infosys Cloud Services,2024-04-08,2024-05-08,248881.69,Paid,2024-04-15,IT,Enterprise software licenses
+INV-2024-062,Apex Facility Management,2024-05-31,2024-06-30,45173.31,Paid,2024-06-05,HR,Corporate wellness program
+INV-2024-063,Tata Tech Logistics,2024-03-22,2024-04-21,822088.07,Paid,2024-04-15,Operations,Office stationery bulk pack
+INV-2024-064,AWS Cloud India,2024-06-18,2024-07-18,38035.22,Overdue,,IT,Server maintenance
+INV-2024-065,Tata Tech Logistics,2024-01-26,2024-02-25,27776.54,Overdue,,Operations,Packaging material supply
+INV-2024-066,Deloitte Advisory,2024-07-04,2024-08-03,90041.84,Paid,2024-07-22,Finance,Accounting software subscription
+INV-2024-067,Tata Tech Logistics,2024-02-15,2024-03-16,67061.16,Overdue,,Operations,Office stationery bulk pack
+INV-2024-068,Deloitte Advisory,2024-07-11,2024-08-10,39073.18,Paid,2024-07-20,Finance,Statutory tax compliance advisory
+INV-2024-069,Infosys Cloud Services,2024-02-28,2024-03-29,43469.06,Overdue,,IT,Workstation upgrades
+INV-2024-070,AWS Cloud India,2024-03-08,2024-04-07,37221.62,Overdue,,IT,Network security audit
+INV-2024-071,Zomato Corporate Dining,2024-03-09,2024-04-08,48699.26,Overdue,,HR,Corporate wellness program
+INV-2024-072,Vanguard Legal Partners,2024-07-02,2024-08-01,35554.27,Overdue,,Legal,Contract review retainership
+INV-2024-073,Microsoft India,2024-07-05,2024-08-04,74344.47,Paid,2024-08-04,IT,Cloud infrastructure hosting
+INV-2024-074,Infosys Cloud Services,2024-05-15,2024-06-14,287407.7,Overdue,,IT,Enterprise software licenses
+INV-2024-075,Tata Tech Logistics,2024-03-04,2024-04-03,574175.21,Overdue,,Operations,Packaging material supply
+INV-2024-076,Dell Technologies India,2024-01-16,2024-02-15,593763.22,Overdue,,IT,Workstation upgrades
+INV-2024-077,Tata Tech Logistics,2024-07-11,2024-08-10,704061.84,Pending,,Operations,Packaging material supply
+INV-2024-078,Vendor ABC Corp,2024-05-10,2024-06-24,737010.58,Paid,2024-06-13,IT,Network security audit
+INV-2024-079,Blue Dart Express,2024-05-07,2024-06-06,61422.54,Overdue,,Operations,Courier services
+INV-2024-080,Deloitte Advisory,2024-02-24,2024-03-25,57473.37,Overdue,,Finance,Statutory tax compliance advisory
+INV-2024-081,Tata Tech Logistics,2024-07-06,2024-08-05,45000.00,Pending,,Operations,Fleet transport charges
+INV-2024-082,Reliance Office Supplies,2024-07-07,2024-08-06,28500.00,Pending,,Operations,Office stationery bulk pack
+INV-2024-083,Vendor ABC Corp,2024-07-12,2024-08-26,480000.00,Pending,,IT,Cloud infrastructure hosting
+INV-2024-084,Microsoft India,2024-07-15,2024-08-14,310000.00,Pending,,IT,Enterprise software licenses
+INV-2024-085,Deloitte Advisory,2024-07-18,2024-08-17,75000.00,Pending,,Finance,Statutory tax compliance advisory
+INV-2024-086,AWS Cloud India,2024-07-20,2024-08-19,540000.00,Pending,,IT,Server maintenance
+INV-2024-087,Blue Dart Express,2024-07-22,2024-08-21,18500.00,Pending,,Operations,Courier services
+INV-2024-088,Infosys Cloud Services,2024-07-25,2024-08-24,225000.00,Pending,,IT,Workstation upgrades
+INV-2024-089,Apex Facility Management,2024-07-28,2024-08-27,62000.00,Pending,,HR,Corporate wellness program
+INV-2024-090,Zomato Corporate Dining,2024-08-02,2024-09-01,89000.00,Pending,,HR,Employee cafeteria catering

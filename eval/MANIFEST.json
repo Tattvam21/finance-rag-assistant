@@ -1,0 +1,43 @@
+{
+  "data/invoices.csv": {
+    "sha256": "04c834d6f4c6c298b45f95dab9ef830089be04e3ecd68b2fe023f9fdbb69bb1c",
+    "bytes": 10009
+  },
+  "data/policies/expense_policy.pdf": {
+    "sha256": "6ed624327f6bc74d0d64a8c7aea3fa21481622dfedc8e68092b3c3a2578a538f",
+    "bytes": 67242
+  },
+  "data/policies/finance_compliance_policy.pdf": {
+    "sha256": "a1483b4e43cabd2686bb434b9c54c38f2c9835b0758253a08270743e0f094959",
+    "bytes": 67020
+  },
+  "data/policies/invoice_terms_policy.pdf": {
+    "sha256": "11b95ee930e38982c1373b750d7d95999396391c8e5f7f3873c8e20c51e2bb99",
+    "bytes": 67328
+  },
+  "data/policies/payment_policy.pdf": {
+    "sha256": "28d0b759ebd65d3cbbf6d801d5b5455360c08f6dab1c8893af745f07916a19d3",
+    "bytes": 67350
+  },
+  "data/policies/vendor_policy.pdf": {
+    "sha256": "9d74aba76a391849769fb8f0b1cf6048c3b0ef639d6ccb1694ef5768d066bc82",
+    "bytes": 67327
+  },
+  "eval/judge_holdout.json": {
+    "sha256": "63794ddbea45e829c7d3b75bfd784b21f21b2d65f83bd82fae1fc91b3d82c427",
+    "bytes": 8933
+  },
+  "eval/planner_stress.json": {
+    "sha256": "92e41e182788654fb6c8f16a5061a6ba5bcdb9609d5860489b4f75639a3c284f",
+    "bytes": 9181
+  },
+  "eval/questions.json": {
+    "sha256": "f9e36308b21f1b5c17617efe0af3c3db78fa8bf8481a759492490b03e4d1d467",
+    "bytes": 10482
+  },
+  "eval/questions_heldout.json": {
+    "sha256": "5181cf7d0fddb7ecbb2fbc68a60f28d8f7e7518db3193d4af59d1e0478c11b80",
+    "bytes": 7162
+  },
+  "_combined_hash": "df6ec10235603e7384002ddbfc7c477897486d54f87577a12a845a2933fc292a"
+}

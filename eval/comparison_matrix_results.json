@@ -1,0 +1,286 @@
+{
+  "Config A": {
+    "cfg": {
+      "name": "Config A",
+      "embed_model": "nomic-embed-text",
+      "retrieval": "hybrid",
+      "gate": "separate",
+      "desc": "nomic, hybrid, sep gate (default)"
+    },
+    "dev": {
+      "n": 40,
+      "passed": 40,
+      "ci": "100.0% (40/40) [91.2%, 100.0%]",
+      "cats": {
+        "policy": "19/19",
+        "trap_condition": "1/1",
+        "trap_gap": "2/2",
+        "unanswerable": "7/7",
+        "invoice": "6/6",
+        "invoice_notfound": "1/1",
+        "mixed": "4/4"
+      },
+      "n_rel": 24,
+      "hit1": "91.7% (22/24)",
+      "hit3": "95.8% (23/24)",
+      "hit5": "100.0% (24/24)",
+      "mrr": "0.948",
+      "citation_ok": "100.0% (24/24)",
+      "tool_ok": "100.0% (40/40)",
+      "refusal_ok": "100.0% (40/40)",
+      "mean_lat": 18.95,
+      "p95_lat": 78.99,
+      "mean_calls": 2.3,
+      "stage_means": {
+        "retrieval": 0.06,
+        "planner": 3.53,
+        "gate": 7.13,
+        "synthesis": 8.19,
+        "grounding_retry": 0.0
+      }
+    },
+    "heldout": {
+      "n": 22,
+      "passed": 22,
+      "ci": "100.0% (22/22) [85.1%, 100.0%]",
+      "cats": {
+        "policy": "11/11",
+        "unanswerable": "5/5",
+        "invoice": "3/3",
+        "invoice_notfound": "1/1",
+        "mixed": "2/2"
+      },
+      "n_rel": 12,
+      "hit1": "83.3% (10/12)",
+      "hit3": "100.0% (12/12)",
+      "hit5": "100.0% (12/12)",
+      "mrr": "0.917",
+      "citation_ok": "100.0% (12/12)",
+      "tool_ok": "100.0% (22/22)",
+      "refusal_ok": "100.0% (22/22)",
+      "mean_lat": 15.51,
+      "p95_lat": 24.89,
+      "mean_calls": 2.23,
+      "stage_means": {
+        "retrieval": 0.06,
+        "planner": 3.45,
+        "gate": 5.66,
+        "synthesis": 6.3,
+        "grounding_retry": 0.0
+      }
+    }
+  },
+  "Config C": {
+    "cfg": {
+      "name": "Config C",
+      "embed_model": "bge-m3",
+      "retrieval": "vector",
+      "gate": "merged",
+      "desc": "bge-m3, vector, merged gate"
+    },
+    "dev": {
+      "n": 40,
+      "passed": 38,
+      "ci": "95.0% (38/40) [83.5%, 98.6%]",
+      "cats": {
+        "policy": "17/19",
+        "trap_condition": "1/1",
+        "trap_gap": "2/2",
+        "unanswerable": "7/7",
+        "invoice": "6/6",
+        "invoice_notfound": "1/1",
+        "mixed": "4/4"
+      },
+      "n_rel": 24,
+      "hit1": "100.0% (24/24)",
+      "hit3": "100.0% (24/24)",
+      "hit5": "100.0% (24/24)",
+      "mrr": "1.000",
+      "citation_ok": "100.0% (24/24)",
+      "tool_ok": "100.0% (40/40)",
+      "refusal_ok": "100.0% (40/40)",
+      "mean_lat": 13.71,
+      "p95_lat": 35.54,
+      "mean_calls": 1.65,
+      "stage_means": {
+        "retrieval": 0.15,
+        "planner": 3.62,
+        "gate": 0.0,
+        "synthesis": 9.91,
+        "grounding_retry": 0.0
+      }
+    },
+    "heldout": {
+      "n": 22,
+      "passed": 21,
+      "ci": "95.5% (21/22) [78.2%, 99.2%]",
+      "cats": {
+        "policy": "10/11",
+        "unanswerable": "5/5",
+        "invoice": "3/3",
+        "invoice_notfound": "1/1",
+        "mixed": "2/2"
+      },
+      "n_rel": 12,
+      "hit1": "100.0% (12/12)",
+      "hit3": "100.0% (12/12)",
+      "hit5": "100.0% (12/12)",
+      "mrr": "1.000",
+      "citation_ok": "91.7% (11/12)",
+      "tool_ok": "100.0% (22/22)",
+      "refusal_ok": "95.5% (21/22)",
+      "mean_lat": 13.31,
+      "p95_lat": 18.39,
+      "mean_calls": 1.59,
+      "stage_means": {
+        "retrieval": 0.11,
+        "planner": 3.49,
+        "gate": 0.0,
+        "synthesis": 9.68,
+        "grounding_retry": 0.0
+      }
+    }
+  },
+  "Config D": {
+    "cfg": {
+      "name": "Config D",
+      "embed_model": "bge-m3",
+      "retrieval": "vector",
+      "gate": "separate",
+      "desc": "bge-m3, vector, sep gate"
+    },
+    "dev": {
+      "n": 40,
+      "passed": 38,
+      "ci": "95.0% (38/40) [83.5%, 98.6%]",
+      "cats": {
+        "policy": "17/19",
+        "trap_condition": "1/1",
+        "trap_gap": "2/2",
+        "unanswerable": "7/7",
+        "invoice": "6/6",
+        "invoice_notfound": "1/1",
+        "mixed": "4/4"
+      },
+      "n_rel": 24,
+      "hit1": "100.0% (24/24)",
+      "hit3": "100.0% (24/24)",
+      "hit5": "100.0% (24/24)",
+      "mrr": "1.000",
+      "citation_ok": "100.0% (24/24)",
+      "tool_ok": "100.0% (40/40)",
+      "refusal_ok": "100.0% (40/40)",
+      "mean_lat": 20.73,
+      "p95_lat": 63.36,
+      "mean_calls": 2.33,
+      "stage_means": {
+        "retrieval": 0.12,
+        "planner": 3.8,
+        "gate": 7.74,
+        "synthesis": 9.04,
+        "grounding_retry": 0.0
+      }
+    },
+    "heldout": {
+      "n": 22,
+      "passed": 21,
+      "ci": "95.5% (21/22) [78.2%, 99.2%]",
+      "cats": {
+        "policy": "10/11",
+        "unanswerable": "5/5",
+        "invoice": "3/3",
+        "invoice_notfound": "1/1",
+        "mixed": "2/2"
+      },
+      "n_rel": 12,
+      "hit1": "100.0% (12/12)",
+      "hit3": "100.0% (12/12)",
+      "hit5": "100.0% (12/12)",
+      "mrr": "1.000",
+      "citation_ok": "91.7% (11/12)",
+      "tool_ok": "100.0% (22/22)",
+      "refusal_ok": "95.5% (21/22)",
+      "mean_lat": 21.01,
+      "p95_lat": 28.74,
+      "mean_calls": 2.23,
+      "stage_means": {
+        "retrieval": 0.11,
+        "planner": 3.7,
+        "gate": 8.3,
+        "synthesis": 8.87,
+        "grounding_retry": 0.0
+      }
+    }
+  },
+  "Config E": {
+    "cfg": {
+      "name": "Config E",
+      "embed_model": "bge-m3",
+      "retrieval": "hybrid",
+      "gate": "merged",
+      "desc": "bge-m3, hybrid, merged gate"
+    },
+    "dev": {
+      "n": 40,
+      "passed": 40,
+      "ci": "100.0% (40/40) [91.2%, 100.0%]",
+      "cats": {
+        "policy": "19/19",
+        "trap_condition": "1/1",
+        "trap_gap": "2/2",
+        "unanswerable": "7/7",
+        "invoice": "6/6",
+        "invoice_notfound": "1/1",
+        "mixed": "4/4"
+      },
+      "n_rel": 24,
+      "hit1": "100.0% (24/24)",
+      "hit3": "100.0% (24/24)",
+      "hit5": "100.0% (24/24)",
+      "mrr": "1.000",
+      "citation_ok": "100.0% (24/24)",
+      "tool_ok": "100.0% (40/40)",
+      "refusal_ok": "100.0% (40/40)",
+      "mean_lat": 14.2,
+      "p95_lat": 37.19,
+      "mean_calls": 1.65,
+      "stage_means": {
+        "retrieval": 0.12,
+        "planner": 3.82,
+        "gate": 0.0,
+        "synthesis": 10.23,
+        "grounding_retry": 0.0
+      }
+    },
+    "heldout": {
+      "n": 22,
+      "passed": 21,
+      "ci": "95.5% (21/22) [78.2%, 99.2%]",
+      "cats": {
+        "policy": "10/11",
+        "unanswerable": "5/5",
+        "invoice": "3/3",
+        "invoice_notfound": "1/1",
+        "mixed": "2/2"
+      },
+      "n_rel": 12,
+      "hit1": "100.0% (12/12)",
+      "hit3": "100.0% (12/12)",
+      "hit5": "100.0% (12/12)",
+      "mrr": "1.000",
+      "citation_ok": "91.7% (11/12)",
+      "tool_ok": "100.0% (22/22)",
+      "refusal_ok": "95.5% (21/22)",
+      "mean_lat": 13.98,
+      "p95_lat": 20.42,
+      "mean_calls": 1.59,
+      "stage_means": {
+        "retrieval": 0.12,
+        "planner": 3.67,
+        "gate": 0.0,
+        "synthesis": 10.16,
+        "grounding_retry": 0.0
+      }
+    }
+  }
+}

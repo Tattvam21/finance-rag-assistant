@@ -1,0 +1,283 @@
+[
+    {
+        "id": "HP01",
+        "category": "policy",
+        "q": "How many days do we normally have to settle a vendor's invoice?",
+        "must_contain": [
+            "30"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "payment_policy.pdf#1.1"
+        ]
+    },
+    {
+        "id": "H01",
+        "category": "policy",
+        "q": "Who needs to approve a ₹30,000 business expense?",
+        "must_contain": [
+            "department head|vp|director"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "expense_policy.pdf#3.1"
+        ]
+    },
+    {
+        "id": "H02",
+        "category": "policy",
+        "q": "What is the daily food allowance in Tier-2 cities?",
+        "must_contain": [
+            "1000"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "expense_policy.pdf#3.2"
+        ]
+    },
+    {
+        "id": "H03",
+        "category": "policy",
+        "q": "Can we pay a vendor by cheque?",
+        "must_contain": [
+            "prohibit|not permitted|not allowed|cannot|may not",
+            "court"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "payment_policy.pdf#1.3"
+        ]
+    },
+    {
+        "id": "H04",
+        "category": "policy",
+        "q": "After how many days are expense claims forfeited unless the VP of People approves them?",
+        "must_contain": [
+            "60"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "expense_policy.pdf#3.3"
+        ]
+    },
+    {
+        "id": "H05",
+        "category": "policy",
+        "q": "What TDS rate applies to corporate contractors under Section 194C?",
+        "must_contain": [
+            "2%"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "finance_compliance_policy.pdf#5.1"
+        ]
+    },
+    {
+        "id": "H06",
+        "category": "policy",
+        "q": "What is the TDS rate on land and building leases under Section 194I?",
+        "must_contain": [
+            "10%"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "finance_compliance_policy.pdf#5.1"
+        ]
+    },
+    {
+        "id": "H07",
+        "category": "policy",
+        "q": "What is the monthly deadline for an invoice to be processed in that month's cycle?",
+        "must_contain": [
+            "25th|25"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "invoice_terms_policy.pdf#4.1"
+        ]
+    },
+    {
+        "id": "H08",
+        "category": "policy",
+        "q": "What invoice discrepancy percentage requires re-authorization under three-way matching?",
+        "must_contain": [
+            "0.5%"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "invoice_terms_policy.pdf#4.4"
+        ]
+    },
+    {
+        "id": "H09",
+        "category": "policy",
+        "q": "To which email address must invoices be submitted?",
+        "must_contain": [
+            "ap@company.com"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "invoice_terms_policy.pdf#4.1"
+        ]
+    },
+    {
+        "id": "H10",
+        "category": "policy",
+        "q": "When does Accounts Payable freeze new purchase orders for an overdue vendor?",
+        "must_contain": [
+            "15"
+        ],
+        "expected_tools": [
+            "search_policies"
+        ],
+        "expected_sources": [
+            "invoice_terms_policy.pdf#4.3"
+        ]
+    },
+    {
+        "id": "HU01",
+        "category": "unanswerable",
+        "q": "What is the TDS rate under Section 194Q?",
+        "expect_refusal": true,
+        "expected_tools": [
+            "search_policies"
+        ]
+    },
+    {
+        "id": "HU02",
+        "category": "unanswerable",
+        "q": "What is the airfare reimbursement limit for business travel?",
+        "expect_refusal": true,
+        "expected_tools": [
+            "search_policies"
+        ]
+    },
+    {
+        "id": "HU03",
+        "category": "unanswerable",
+        "q": "What is the GST rate on cloud services?",
+        "expect_refusal": true,
+        "expected_tools": [
+            "search_policies"
+        ]
+    },
+    {
+        "id": "HU04",
+        "category": "unanswerable",
+        "q": "What is the work-from-home policy?",
+        "expect_refusal": true,
+        "expected_tools": [
+            "search_policies"
+        ]
+    },
+    {
+        "id": "HU05",
+        "category": "unanswerable",
+        "q": "Which bank is used for RTGS payments?",
+        "expect_refusal": true,
+        "expected_tools": [
+            "search_policies"
+        ]
+    },
+    {
+        "id": "HI01",
+        "category": "invoice",
+        "q": "Show overdue invoices for Deloitte Advisory",
+        "data_check": {
+            "status_in": [
+                "overdue"
+            ],
+            "vendor": "Deloitte Advisory",
+            "check_total": false
+        },
+        "expected_tools": [
+            "query_invoices"
+        ]
+    },
+    {
+        "id": "HI02",
+        "category": "invoice",
+        "q": "What is the total value of pending invoices?",
+        "data_check": {
+            "status_in": [
+                "pending"
+            ],
+            "check_total": true
+        },
+        "expected_tools": [
+            "query_invoices"
+        ]
+    },
+    {
+        "id": "HI03",
+        "category": "invoice",
+        "q": "What is the status of INV-2024-055?",
+        "must_contain": [
+            "overdue"
+        ],
+        "expected_tools": [
+            "query_invoices"
+        ]
+    },
+    {
+        "id": "HI04",
+        "category": "invoice_notfound",
+        "q": "Is INV-2024-999 overdue?",
+        "must_contain": [
+            "not found|couldn't find|no invoice|does not exist|doesn't exist"
+        ],
+        "expected_tools": [
+            "query_invoices"
+        ]
+    },
+    {
+        "id": "HM01",
+        "category": "mixed",
+        "q": "Which payment method applies to INV-2024-048, and who is the vendor?",
+        "must_contain": [
+            "rtgs",
+            "blue dart"
+        ],
+        "expected_tools": [
+            "query_invoices",
+            "search_policies"
+        ],
+        "expected_sources": [
+            "payment_policy.pdf#1.3"
+        ]
+    },
+    {
+        "id": "HM02",
+        "category": "mixed",
+        "q": "How much late fee is owed on INV-2024-055, and under what condition does it apply?",
+        "must_contain": [
+            "billing error|internal processing"
+        ],
+        "late_fee_check": {
+            "invoice_id": "INV-2024-055"
+        },
+        "expected_tools": [
+            "calculate_late_fee"
+        ]
+    }
+]

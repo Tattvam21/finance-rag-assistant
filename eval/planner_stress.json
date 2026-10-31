@@ -1,0 +1,315 @@
+[
+  {
+    "id": "STRESS-01",
+    "question": "What is company policy regarding paid leave and vacation rollover?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-02",
+    "question": "What is the overdue escalation workflow for delayed vendor settlements?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-03",
+    "question": "Which payment routing applies to payments between \u20b910,000 and \u20b92,00,000?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-04",
+    "question": "How much do we owe Deloitte?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_vendor": "Deloitte",
+    "expected_has_late_fee": false,
+    "expected_status": [
+      "Pending",
+      "Overdue"
+    ]
+  },
+  {
+    "id": "STRESS-05",
+    "question": "Which vendors are running late?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_status": [
+      "Overdue"
+    ],
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-06",
+    "question": "Calculate late fee for INV 036",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_invoice_id": "INV 036",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-07",
+    "question": "What is the status of invoice number 36?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_invoice_id": "invoice number 36",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-08",
+    "question": "What is the balance due for invoice no. 48?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_invoice_id": "invoice no. 48",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-09",
+    "question": "Is INV-2024-036 overdue, and which escalation phase applies?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": true,
+    "expected_invoice_id": "INV-2024-036",
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-10",
+    "question": "Which payment method applies to INV 048 based on its amount?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_invoice_id": "INV 048",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-11",
+    "question": "Show all unpaid invoices above 1 lakh",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_min_amount": 100000.0,
+    "expected_has_late_fee": false,
+    "expected_status": [
+      "Pending",
+      "Overdue"
+    ]
+  },
+  {
+    "id": "STRESS-12",
+    "question": "List all overdue invoices",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_status": [
+      "Overdue"
+    ],
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-13",
+    "question": "What is the standard Net payment term in our policy?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-14",
+    "question": "What are the travel per diem allowances for tier 1 cities?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-15",
+    "question": "What is the TDS withholding tax rate under Section 194J?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-16",
+    "question": "What is the GST rate applicable to IT software services?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-17",
+    "question": "What is the invoice dispute resolution procedure?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-18",
+    "question": "Who approves an expense exceeding \u20b91,00,000?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-19",
+    "question": "How many invoices are currently in Pending status?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_status": [
+      "Pending"
+    ],
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-20",
+    "question": "What is the total value of all paid invoices?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_status": [
+      "Paid"
+    ],
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-21",
+    "question": "What is the late fee policy interest rate per month?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-22",
+    "question": "What happens when an invoice reaches day 15 overdue?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-23",
+    "question": "Show all invoices for Microsoft India",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_vendor": "Microsoft India",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-24",
+    "question": "What is the total amount due to Blue Dart Express?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_vendor": "Blue Dart Express",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-25",
+    "question": "What prompt payment discount makes a vendor prioritized in the payment run?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-26",
+    "question": "How long must accounting records and invoices be retained under compliance policy?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-27",
+    "question": "Can an employee book business class flights for domestic travel?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-28",
+    "question": "What is the CEO personal phone number and home address?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-29",
+    "question": "What is the corporate policy on employee vacation leave and holidays?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-30",
+    "question": "What are the payment terms granted to Vendor ABC Corp under MSA-2023-ABC?",
+    "expected_needs_policy": true,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": false,
+    "dev_duplicate": true
+  },
+  {
+    "id": "STRESS-31",
+    "question": "Calculate the late fee for INV-2024-048",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-048"
+  },
+  {
+    "id": "STRESS-32",
+    "question": "Calculate late fee for inv-2024-048",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-048"
+  },
+  {
+    "id": "STRESS-33",
+    "question": "Calculate late fee for INV 055",
+    "expected_needs_policy": false,
+    "expected_has_invoice": true,
+    "expected_invoice_id": "INV 055",
+    "expected_has_late_fee": false
+  },
+  {
+    "id": "STRESS-34",
+    "question": "Calculate late fee for INV-2024-081",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-081"
+  },
+  {
+    "id": "STRESS-35",
+    "question": "Calculate late fee for INV-2024-001",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-001"
+  },
+  {
+    "id": "STRESS-36",
+    "question": "Calculate late fee for INV-2024-999",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-999"
+  },
+  {
+    "id": "STRESS-37",
+    "question": "What late interest charge applies to INV-2024-036?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-036"
+  },
+  {
+    "id": "STRESS-38",
+    "question": "What penalty applies to overdue invoice INV-2024-036?",
+    "expected_needs_policy": false,
+    "expected_has_invoice": false,
+    "expected_has_late_fee": true,
+    "expected_late_fee_id": "INV-2024-036"
+  }
+]

@@ -1,0 +1,547 @@
+[
+ {
+  "id": "P01",
+  "category": "policy",
+  "q": "What is the payment period?",
+  "must_contain": [
+   "30"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "payment_policy.pdf#1.1"
+  ]
+ },
+ {
+  "id": "P02",
+  "category": "policy",
+  "q": "What are the payment terms for Vendor ABC Corp?",
+  "must_contain": [
+   "45"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "vendor_policy.pdf#2.2"
+  ]
+ },
+ {
+  "id": "P03",
+  "category": "policy",
+  "q": "What is the late fee rate on overdue invoices?",
+  "must_contain": [
+   "2%|2.0%",
+   "24%"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.2"
+  ]
+ },
+ {
+  "id": "P04",
+  "category": "policy",
+  "q": "On which days does Accounts Payable run bulk disbursements?",
+  "must_contain": [
+   "1st",
+   "15th"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "payment_policy.pdf#1.2"
+  ]
+ },
+ {
+  "id": "P05",
+  "category": "policy",
+  "q": "Which vendor payments must be routed via RTGS?",
+  "must_contain": [
+   "rtgs",
+   "200000|2 lakh"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "payment_policy.pdf#1.3"
+  ]
+ },
+ {
+  "id": "P06",
+  "category": "policy",
+  "q": "What prompt payment discount, for settlement within how many days, makes a vendor prioritized in the weekly payment run?",
+  "must_contain": [
+   "1.5%",
+   "ten|within 10|10 calendar|10 days"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "payment_policy.pdf#1.4"
+  ]
+ },
+ {
+  "id": "P07",
+  "category": "policy",
+  "q": "What happens when an invoice reaches day 15 overdue?",
+  "must_contain": [
+   "escalation meeting|finance controller",
+   "freez"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.3"
+  ]
+ },
+ {
+  "id": "P08",
+  "category": "policy",
+  "q": "What is Phase 3 of the overdue escalation workflow, and from which overdue day does it start?",
+  "must_contain": [
+   "30",
+   "legal|dispute"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.3"
+  ]
+ },
+ {
+  "id": "P09",
+  "category": "policy",
+  "q": "What is the monthly billing cutoff for invoice submission?",
+  "must_contain": [
+   "25th|25"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.1"
+  ]
+ },
+ {
+  "id": "P10",
+  "category": "policy",
+  "q": "Which documents are needed for three-way matching?",
+  "must_contain": [
+   "purchase order",
+   "goods received|grn"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.4"
+  ]
+ },
+ {
+  "id": "P11",
+  "category": "policy",
+  "q": "Who must approve any expenditure above ₹1,00,000?",
+  "must_contain": [
+   "cfo|chief financial officer"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "expense_policy.pdf#3.1"
+  ]
+ },
+ {
+  "id": "P12",
+  "category": "policy",
+  "q": "What is the maximum lodging reimbursement per night in Tier-1 cities?",
+  "must_contain": [
+   "6500"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "expense_policy.pdf#3.2"
+  ]
+ },
+ {
+  "id": "P13",
+  "category": "policy",
+  "q": "Within how many days must expense reports be submitted, and when are claims forfeited?",
+  "must_contain": [
+   "30",
+   "60"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "expense_policy.pdf#3.3"
+  ]
+ },
+ {
+  "id": "P14",
+  "category": "policy",
+  "q": "What is the TDS rate for professional fees under Section 194J?",
+  "must_contain": [
+   "10%"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "finance_compliance_policy.pdf#5.1"
+  ]
+ },
+ {
+  "id": "P15",
+  "category": "policy",
+  "q": "How long must tax invoices and payment remittance slips be retained?",
+  "must_contain": [
+   "eight|8"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "finance_compliance_policy.pdf#5.3"
+  ]
+ },
+ {
+  "id": "P16",
+  "category": "policy",
+  "q": "How soon must Accounts Payable notify a vendor about an invoice discrepancy?",
+  "must_contain": [
+   "seven|7"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "vendor_policy.pdf#2.3"
+  ]
+ },
+ {
+  "id": "P17",
+  "category": "policy",
+  "q": "Can a supplier without active GST registration be onboarded for a contract above ₹50,000 per annum?",
+  "must_contain": [
+   "cannot|can't|not"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "vendor_policy.pdf#2.1"
+  ]
+ },
+ {
+  "id": "P18",
+  "category": "policy",
+  "q": "What happens to a vendor's payouts if it fails GST filing for two consecutive quarters?",
+  "must_contain": [
+   "block"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "vendor_policy.pdf#2.4"
+  ]
+ },
+ {
+  "id": "P19",
+  "category": "policy",
+  "q": "Which payment methods are used for payments between ₹10,000 and ₹2,00,000?",
+  "must_contain": [
+   "neft",
+   "imps"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "payment_policy.pdf#1.3"
+  ]
+ },
+ {
+  "id": "G01",
+  "category": "trap_condition",
+  "q": "Does the late fee still apply if the delay was caused by a vendor billing error?",
+  "must_contain": [
+   "billing error|internal processing|solely",
+   "not|only|no"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.2"
+  ]
+ },
+ {
+  "id": "G02",
+  "category": "trap_gap",
+  "q": "Is there a maximum cap on the late fee?",
+  "accept_refusal": true,
+  "must_contain": [
+   "no cap|not specif|does not mention|doesn't mention|no mention|not state|not address"
+  ],
+  "must_not_contain": [
+   "capped at",
+   "maximum of"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "G03",
+  "category": "trap_gap",
+  "q": "Is there a grace period before late interest starts accruing?",
+  "accept_refusal": true,
+  "must_contain": [
+   "no grace|not specif|does not mention|doesn't mention|no mention|not state|not address"
+  ],
+  "must_not_contain": [
+   "grace period of"
+  ],
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U01",
+  "category": "unanswerable",
+  "q": "What is the CEO's salary?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U02",
+  "category": "unanswerable",
+  "q": "What is the standard GST rate in India?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U03",
+  "category": "unanswerable",
+  "q": "How many paid leave days do employees get per year?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U04",
+  "category": "unanswerable",
+  "q": "What is the TDS rate under Section 194H for commission?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U05",
+  "category": "unanswerable",
+  "q": "What is Vendor ABC Corp's bank account number?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U06",
+  "category": "unanswerable",
+  "q": "What is the company's dress code?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "U07",
+  "category": "unanswerable",
+  "q": "What is the corporate income tax rate?",
+  "expect_refusal": true,
+  "expected_tools": [
+   "search_policies"
+  ]
+ },
+ {
+  "id": "I01",
+  "category": "invoice",
+  "q": "Show invoices above ₹1 lakh that are unpaid",
+  "data_check": {
+   "status_in": [
+    "pending",
+    "overdue"
+   ],
+   "min_amount": 100000,
+   "check_total": true
+  },
+  "expected_tools": [
+   "query_invoices"
+  ]
+ },
+ {
+  "id": "I02",
+  "category": "invoice",
+  "q": "How many invoices are overdue?",
+  "data_check": {
+   "status_in": [
+    "overdue"
+   ],
+   "check_total": false
+  },
+  "expected_tools": [
+   "query_invoices"
+  ]
+ },
+ {
+  "id": "I03",
+  "category": "invoice",
+  "q": "Show all pending invoices for Vendor ABC Corp",
+  "data_check": {
+   "status_in": [
+    "pending"
+   ],
+   "vendor": "Vendor ABC Corp",
+   "check_total": false
+  },
+  "expected_tools": [
+   "query_invoices"
+  ]
+ },
+ {
+  "id": "I04",
+  "category": "invoice",
+  "q": "What is the status of INV-2024-036?",
+  "must_contain": [
+   "overdue"
+  ],
+  "expected_tools": [
+   "query_invoices"
+  ]
+ },
+ {
+  "id": "I05",
+  "category": "invoice",
+  "q": "What is the status of INV-2024-001 and who is the vendor?",
+  "must_contain": [
+   "paid",
+   "blue dart"
+  ],
+  "expected_tools": [
+   "query_invoices"
+  ]
+ },
+ {
+  "id": "I06",
+  "category": "invoice_notfound",
+  "q": "Is INV001 overdue?",
+  "must_contain": [
+   "not found|couldn't find|no invoice|does not exist|doesn't exist",
+   "inv-2024-001"
+  ],
+  "expected_tools": [
+   "query_invoices"
+  ]
+ },
+ {
+  "id": "I07",
+  "category": "invoice",
+  "q": "How much late fee is owed on INV-2024-036?",
+  "late_fee_check": {
+   "invoice_id": "INV-2024-036"
+  },
+  "expected_tools": [
+   "calculate_late_fee"
+  ]
+ },
+ {
+  "id": "M01",
+  "category": "mixed",
+  "q": "Is INV-2024-036 overdue, and which escalation phase applies to it?",
+  "must_contain": [
+   "overdue",
+   "phase 3|30"
+  ],
+  "expected_tools": [
+   "query_invoices",
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.3"
+  ]
+ },
+ {
+  "id": "M02",
+  "category": "mixed",
+  "q": "Which payment method must be used to pay INV-2024-036?",
+  "must_contain": [
+   "rtgs"
+  ],
+  "expected_tools": [
+   "query_invoices",
+   "search_policies"
+  ],
+  "expected_sources": [
+   "payment_policy.pdf#1.3"
+  ]
+ },
+ {
+  "id": "M03",
+  "category": "mixed",
+  "q": "What are the payment terms for Vendor ABC Corp, and how many of its invoices are unpaid?",
+  "must_contain": [
+   "45"
+  ],
+  "data_check": {
+   "status_in": [
+    "pending",
+    "overdue"
+   ],
+   "vendor": "Vendor ABC Corp",
+   "check_total": false
+  },
+  "expected_tools": [
+   "query_invoices",
+   "search_policies"
+  ],
+  "expected_sources": [
+   "vendor_policy.pdf#2.2"
+  ]
+ },
+ {
+  "id": "M04",
+  "category": "mixed",
+  "q": "Is INV-2024-036 overdue, and what is the late fee rate?",
+  "must_contain": [
+   "overdue",
+   "2%|2.0%"
+  ],
+  "expected_tools": [
+   "query_invoices",
+   "search_policies"
+  ],
+  "expected_sources": [
+   "invoice_terms_policy.pdf#4.2"
+  ]
+ }
+]

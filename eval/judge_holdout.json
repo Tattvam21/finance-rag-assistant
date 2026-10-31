@@ -1,0 +1,152 @@
+[
+  {
+    "id": "JH-CORRECT-01",
+    "question": "What is the standard payment timeline for registered vendor invoices?",
+    "answer": "All standard vendor invoices are scheduled for disbursement strictly Net 30 calendar days from the receipt of an undisputed tax invoice [payment_policy.pdf, p.1, §1.1].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-02",
+    "question": "Which electronic transfer channel is mandated for vendor payments greater than ₹2,00,000?",
+    "answer": "Disbursements exceeding ₹2,00,000 must be routed through Real Time Gross Settlement (RTGS) [payment_policy.pdf, p.1, §1.3].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-03",
+    "question": "What incentive qualifies a supplier to be prioritized during weekly payments?",
+    "answer": "Suppliers granting an early payment discount of 1.5% or more for settlement within ten (10) calendar days receive priority in the weekly payment run [payment_policy.pdf, p.1, §1.4].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-04",
+    "question": "Who is authorized to approve a staff business outlay of ₹18,500?",
+    "answer": "Expenses falling between ₹5,001 and ₹25,000 require authorization by the employee's Team Lead or Manager under Tier 2 limits [expense_policy.pdf, p.1, §3.1].",
+    "expected_supported": false,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-05",
+    "question": "What per diem allowance applies for meals in Major Metros?",
+    "answer": "Daily food allowance for Tier 1 metropolitan locations is capped at ₹1,500 per day [expense_policy.pdf, p.1, §3.2].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-06",
+    "question": "What withholding tax percentage is deducted for technical and professional services?",
+    "answer": "TDS is deducted at a rate of 10% on professional and technical services under Section 194J of the Income Tax Act [finance_compliance_policy.pdf, p.1, §5.1].",
+    "expected_supported": false,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-07",
+    "question": "What is the penalty interest rate applied to overdue invoice balances?",
+    "answer": "Overdue invoices accrue simple interest at 2.0% per month (24% per annum) calculated pro-rata on the principal balance from the day following the due date [invoice_terms_policy.pdf, p.1, §4.2].",
+    "expected_supported": false,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-08",
+    "question": "What mismatch tolerance triggers re-authorization during three-way matching?",
+    "answer": "Any discrepancy exceeding 0.5% between the PO, GRN (or Service Completion Certificate), and vendor tax invoice requires re-authorization [invoice_terms_policy.pdf, p.1, §4.4].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-09",
+    "question": "What action occurs when an unpaid invoice reaches 15 days overdue?",
+    "answer": "At Phase 2 (Day 15 Overdue), an escalation meeting is held between the Finance Controller and Vendor Account Lead, and AP freezes new purchase order issuance [invoice_terms_policy.pdf, p.1, §4.3].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-CORRECT-10",
+    "question": "How long must corporate tax and accounting invoices be preserved?",
+    "answer": "Tax invoices, debit notes, credit notes, and payment remittance slips must be retained in digital storage for a statutory minimum of eight (8) consecutive fiscal years [finance_compliance_policy.pdf, p.1, §5.3].",
+    "expected_supported": true,
+    "category": "correct_reworded"
+  },
+  {
+    "id": "JH-UNSUPPORTED-01",
+    "question": "What is the TDS withholding tax rate on commission and brokerage payments?",
+    "answer": "Commission and brokerage fees are subject to 5% TDS under Section 194H of the Income Tax Act [finance_compliance_policy.pdf, p.1, §5.1].",
+    "expected_supported": false,
+    "category": "adjacent_section_extrapolation",
+    "flaw_description": "Extrapolates Section 194H (commission at 5%), but §5.1 only mentions Section 194C (contractors at 1%/2%), Section 194J (professional at 10%, technical at 2%), and Section 194I (rent at 10%/2%)."
+  },
+  {
+    "id": "JH-UNSUPPORTED-02",
+    "question": "Do out-of-pocket medical emergencies during business travel require receipts?",
+    "answer": "Emergency medical treatment expenses incurred during official company travel are exempt from the receipt submission requirement and are reimbursed automatically upon verbal notification [expense_policy.pdf, p.1, §3.3].",
+    "expected_supported": false,
+    "category": "invented_exception",
+    "flaw_description": "Invented exception: policy does not contain any medical exemption, and specifies that claims submitted after 60 days will be forfeited without automatic verbal reimbursement."
+  },
+  {
+    "id": "JH-UNSUPPORTED-03",
+    "question": "What is the standard payment term for vendor invoices?",
+    "answer": "The organization operates strictly under Net 30 business days from the date an invoice is received [payment_policy.pdf, p.1, §1.1].",
+    "expected_supported": false,
+    "category": "changed_unit_or_time_period",
+    "flaw_description": "Changed unit from 'calendar days' to 'business days'."
+  },
+  {
+    "id": "JH-UNSUPPORTED-04",
+    "question": "What early settlement discount allows priority payment processing?",
+    "answer": "Vendors granting a 1.5% discount for payments settled within ten (10) business days will be prioritized in the payment queue [payment_policy.pdf, p.1, §1.4].",
+    "expected_supported": false,
+    "category": "changed_unit_or_time_period",
+    "flaw_description": "Changed discount qualification window from '10 calendar days' to '10 business days'."
+  },
+  {
+    "id": "JH-UNSUPPORTED-05",
+    "question": "Who must approve a ₹15,000 team lunch expense?",
+    "answer": "An outlay of ₹15,000 falls under Tier 3 and requires sign-off from the Department Head [expense_policy.pdf, p.1, §3.1].",
+    "expected_supported": false,
+    "category": "swapped_tier",
+    "flaw_description": "Swapped Tier 2 (₹5,001-₹25,000 direct Reporting Manager) with Tier 3 (₹25,001-₹1,00,000 Department Head)."
+  },
+  {
+    "id": "JH-UNSUPPORTED-06",
+    "question": "What variance between PO and invoice requires re-authorization?",
+    "answer": "Any discrepancy exceeding 0.5% between PO, GRN, and vendor invoice requires re-authorization [payment_policy.pdf, p.1, §1.1].",
+    "expected_supported": false,
+    "category": "wrong_section_citation",
+    "flaw_description": "Correct fact (0.5% discrepancy) cited to wrong document and section: §1.1 of payment_policy instead of invoice_terms_policy §4.4."
+  },
+  {
+    "id": "JH-UNSUPPORTED-07",
+    "question": "What payment routing is used for transactions above ₹2,00,000?",
+    "answer": "Transactions exceeding ₹2,00,000 must be processed via Automated Clearing House (ACH) or corporate credit card [payment_policy.pdf, p.1, §1.3].",
+    "expected_supported": false,
+    "category": "invented_payment_method",
+    "flaw_description": "Invented payment methods (ACH / corporate card); policy strictly mandates RTGS for amounts exceeding ₹2,00,000."
+  },
+  {
+    "id": "JH-UNSUPPORTED-08",
+    "question": "What is the penalty interest rate applied to overdue balances?",
+    "answer": "Overdue invoices accrue interest charges at 2.5% per month (30% per annum) on the principal balance [invoice_terms_policy.pdf, p.1, §4.2].",
+    "expected_supported": false,
+    "category": "subtly_changed_numeric_rate",
+    "flaw_description": "Subtly altered interest rate from 2.0% per month (24% per annum) to 2.5% per month (30% per annum)."
+  },
+  {
+    "id": "JH-UNSUPPORTED-09",
+    "question": "What escalation step takes place during the initial two weeks of an overdue invoice?",
+    "answer": "During Phase 1 (Day 1 to 14 Overdue), Accounts Payable freezes new purchase order issuance to the vendor [invoice_terms_policy.pdf, p.1, §4.3].",
+    "expected_supported": false,
+    "category": "swapped_escalation_phase",
+    "flaw_description": "PO freezing belongs to Phase 2 (Day 15 Overdue), whereas Phase 1 only sends automated ERP reminder notifications."
+  },
+  {
+    "id": "JH-UNSUPPORTED-10",
+    "question": "How long must accounting records and tax invoices be retained?",
+    "answer": "Invoices and accounting vouchers must be securely archived for fifteen (15) financial years under compliance rules [finance_compliance_policy.pdf, p.1, §5.3].",
+    "expected_supported": false,
+    "category": "altered_statutory_period",
+    "flaw_description": "Altered statutory retention period from eight (8) years to fifteen (15) years."
+  }
+]
