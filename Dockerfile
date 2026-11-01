@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 WORKDIR /workspace
 
@@ -15,12 +15,13 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy source code and data
+# Copy source code and data (.dockerignore ensures .env and virtual environments are never copied)
 COPY . .
 
-# Initialize synthetic data if not already present
-RUN python scripts/generate_synthetic_data.py
-
 EXPOSE 8000
+
+# Healthcheck
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=10s \
+  CMD curl -f http://localhost:8000/health || exit 1
 
 CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

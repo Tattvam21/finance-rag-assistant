@@ -1,0 +1,11 @@
+.env
+.venv/
+.clean_venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+pgvector_data/
+data/finance_rag.db
+.git
+

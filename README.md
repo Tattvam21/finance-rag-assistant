@@ -1,170 +1,237 @@
 # Finance RAG & Invoice Assistant
 
-A production-grade, hybrid financial assistant that bridges unstructured company policies and structured transaction databases through an **intelligent dual-path router**.
+A production-grade, hybrid financial assistant that bridges unstructured company policies and structured relational invoice databases through an **intelligent dual-path planner** with **deterministic claim guards**.
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart TD
-    User([User Question]) --> Rewriter[Conversation History & Follow-up Rewriter]
-    Rewriter --> Router{Query Router / Tool Classifier}
-    
+    User([User Question]) --> FastAPIServer[FastAPI Server / CLI]
+    FastAPIServer --> QueryPlanner{Query Planner / Tool Classifier}
+
     %% Path 1: Policy Vector RAG
-    Router -->|Policy Questions| CandidateSearch[pgvector Cosine Retrieval - Top 20]
-    CandidateSearch --> HybridRerank[BM25 + Heading Hybrid Reranker - Top 5]
-    HybridRerank --> ThresholdCheck{Similarity >= 0.08?}
-    ThresholdCheck -->|Yes| PromptContext[Build Context with [#] File, p.X, §Y]
-    ThresholdCheck -->|No| Refusal[Anti-Hallucination Refusal: 'Not found']
-    
+    QueryPlanner -->|Policy Questions| HybridSearch[pgvector + BM25 Hybrid Retrieval - Top 5]
+    HybridSearch --> PolicyContext[Extracted Policy Context with Exact Inline Citations]
+
     %% Path 2: Structured SQL Data
-    Router -->|Data Questions| SQLTool[Parameterized Safe SQL Query]
-    SQLTool --> InvoicesDB[(Postgres Invoices Table)]
-    InvoicesDB --> TableResult[Invoice Records & Metrics]
-    
-    %% Path 3: Mixed Queries
-    Router -->|Mixed Questions| MixedExec[Execute Tool Calls in Parallel]
-    MixedExec --> PromptContext
-    MixedExec --> TableResult
-    
-    %% Synthesis
-    PromptContext --> LLMSynthesis[LLM Answer Synthesis / SSE Streaming]
-    TableResult --> LLMSynthesis
-    Refusal --> LLMSynthesis
-    LLMSynthesis --> Output([Final Answer + Citations + Data Rows])
+    QueryPlanner -->|Invoice Inquiries| SQLTools[Parameterized Safe SQL Query / Late Fee Tool]
+    SQLTools --> PostgresDB[(PostgreSQL / pgvector)]
+    PostgresDB --> InvoiceRows[Structured Invoice Records & Status Aggregates]
+
+    %% Synthesis & Verification
+    PolicyContext --> LLMSynthesis[Ollama Qwen 8B LLM Synthesis]
+    InvoiceRows --> LLMSynthesis
+
+    LLMSynthesis --> DeterministicGuards{Deterministic Claim Guards}
+    DeterministicGuards -->|Numeric Verification| NumericGuard[Value, Unit, and Multi-Currency Tolerance Check]
+    DeterministicGuards -->|Missing Condition| ConditionAppend[Verbatim Policy Clause Append]
+    DeterministicGuards -->|Data Contradiction| PureDataGuard[Deterministic Pure-Data Template Replacement]
+    DeterministicGuards -->|Unanswerable Gate| RefusalGate[Strict Policy Absence Refusal]
+
+    NumericGuard --> FinalAnswer([Verified Answer + Citations + Invoice Tables])
+    ConditionAppend --> FinalAnswer
+    PureDataGuard --> FinalAnswer
+    RefusalGate --> FinalAnswer
+
+    FinalAnswer --> SSEStreaming[SSE Streaming /chat/stream]
+    FinalAnswer --> JSONResponse[JSON REST API /chat]
 ```
 
 ---
 
-## Architecture Highlights
+## Features
 
-1. **Dual-Path Routing (No Embeddings for Numbers)**:
-   - Policy questions (*"What is the penalty for overdue invoices?"*) $\rightarrow$ **Vector RAG** over parsed PDFs with exact citations.
-   - Structured numeric questions (*"Show unpaid invoices above ₹1 lakh"*) $\rightarrow$ **Safe Parameterized SQL** over relational database tables.
-   - Mixed questions (*"Is INV-2024-001 overdue, and what is the late fee?"*) $\rightarrow$ Executes **both tools in parallel** and synthesizes a combined answer.
-2. **Phase 5 Anti-Hallucination Guard**:
-   - Numbered citation tags: `([1] payment_policy.pdf, p.1, §1.1)`.
-   - Enforces a cosine similarity threshold (`SIMILARITY_THRESHOLD = 0.08`) and substantive keyword presence. Refuses unanswerable questions (e.g. CEO salary, cryptocurrency) without hallucination.
-3. **Phase 9 Evaluation & Chunking Benchmark**:
-   - Comprehensive 32-question benchmark suite measuring **Retrieval Hit Rate @ 5**, **Answer Correctness**, **Faithfulness**, and **Refusal Accuracy**.
-   - Empirical experiment comparing **300 vs 500 vs 800** token chunking strategies.
-4. **Phase 10 Advanced Features**:
-   - **Hybrid Search & Reranking**: Retrieve top 20 candidates via vector search, rerank down to top 5 using lexical BM25 matching and heading boosts.
-   - **Server-Sent Events (SSE) Streaming**: Real-time token streaming via `POST /chat/stream`.
-   - **Conversational Memory & Query Rewriting**: Maintains session history per `session_id` and automatically rewrites contextual follow-ups (*"what about Vendor ABC?"*) into standalone queries before retrieval.
-   - **Containerization**: Complete multi-container `Dockerfile` and `docker-compose.yml` orchestrating Postgres 16 (pgvector) and FastAPI.
+1. **Dual-Path Architecture**:
+   - **Policy Documents**: Parsed from PDFs, chunked with section hierarchy, embedded with `bge-m3` (1024-dim), and searched using hybrid vector cosine distance + full-text search merged via Reciprocal Rank Fusion (RRF, $k=60$).
+   - **Relational Invoices**: Structured queries, invoice status breakdowns, and late fee calculations execute directly against PostgreSQL with parameterized queries.
+2. **Deterministic Claim Guards (Zero Extra LLM Calls)**:
+   - **Numeric Token Grounding**: Enforces strict value-unit pairings (percentages, day counts, lakhs/crores).
+   - **Data Claim Guard**: Verifies counts (unpaid, overdue, pending), sums, and amounts against SQL ground truth; deterministic data sentences overwrite hallucinations without re-calling the LLM.
+   - **Gap & Condition Handling**: Distinguishes between unanswerable questions (refusal) and policy omissions (gap overrides). Verbatim conditions are appended when missing.
+3. **Containerized REST API & SSE Streaming**:
+   - Packaged with Docker Compose (`api` on port 8000, `db` with PostgreSQL 16 pgvector on port 5432).
+   - Ollama runs natively on the Mac host, reachable from inside Docker via `http://host.docker.internal:11434`.
 
 ---
 
-## Benchmark Results (Phase 9 Evaluation)
+## Project Structure
 
-### 1. Chunking Experiment (The Interview Story)
-
-Tested across 22 ground-truth policy questions:
-
-| Chunk Size (tokens) | Overlap (tokens) | Total Chunks | Hit Rate @ 5 (%) | Avg Top-1 Cosine Sim | Avg Latency (ms) | Takeaway |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **300** | 30 | 23 | **95.5%** | 0.2537 | 2.02 ms | Higher chunk count; ideal for isolated clause citations. |
-| **500** | 50 | 23 | **95.5%** | 0.2537 | 2.00 ms | **Optimal production baseline**; balances section context with token cost. |
-| **800** | 80 | 23 | **95.5%** | 0.2537 | 2.02 ms | Broader paragraph context; fewer total database rows. |
-
-### 2. Full System Evaluation Scorecard (32 Questions)
-
-Run using `python eval/run_eval.py`:
-
-| Metric | Result | Description |
-| :--- | :--- | :--- |
-| **Retrieval Hit Rate @ 5** | **87.0%** (20/23) | Expected source document returned in the top-5 candidates. |
-| **Answer Correctness** | **75.0%** | Answer matches ground-truth facts or executes required data query. |
-| **Faithfulness to Context** | **81.2%** | Generated statements are strictly grounded in retrieved citations. |
-| **Refusal / Anti-Hallucination** | **Passed** | Successfully identifies out-of-domain queries without fabricating policy rules. |
-| **Average Query Latency** | **4.93 ms** | Sub-5ms retrieval and routing execution time. |
+```
+.
+├── Dockerfile                  # API container (Python 3.13-slim)
+├── docker-compose.yml          # Postgres (pgvector) + FastAPI orchestration
+├── requirements.txt            # Python dependencies
+├── .env.example                # Template with non-secret defaults & blanked credentials
+├── ask.py                      # CLI entrypoint for querying the assistant
+├── app/
+│   ├── config.py               # Runtime configuration & startup health checks
+│   ├── db.py                   # PostgreSQL connection management & pgvector init
+│   ├── api/
+│   │   ├── main.py             # FastAPI server (/chat, /chat/stream, /search, /documents/upload, /health)
+│   │   └── index.html          # Interactive Web UI
+│   ├── ingestion/              # PDF parsing, semantic chunking, and embedding
+│   ├── retrieval/              # Hybrid vector + lexical search with RRF reranking
+│   ├── tools/                  # Parameterized invoice and late fee calculations
+│   ├── llm/                    # Query planner, prompt synthesis, and conversation history
+│   └── utils/                  # Deterministic guards, formatters, and numeric helpers
+├── data/
+│   ├── invoices.csv            # Relational invoice records
+│   └── policies/               # Financial policy PDF documents
+├── eval/                       # Evaluation suites, benchmark questions, and results
+├── scripts/                    # Ingestion, data generation, and benchmark scripts
+└── tests/                      # Pytest suite (API endpoints, guards, numeric handling)
+```
 
 ---
 
 ## Quick Start
 
-### Option A: Run Locally (Python 3.11+)
+### 1. Prerequisites
+- Docker & Docker Compose
+- Native [Ollama](https://ollama.com) running on macOS with required models:
+  ```bash
+  ollama pull qwen3:8b
+  ollama pull bge-m3
+  ```
 
-1. **Activate virtual environment & install requirements**:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
+### 2. Environment Setup
+```bash
+cp .env.example .env
+```
+*(Update `POSTGRES_PASSWORD` in `.env` if desired; non-secret defaults are pre-configured.)*
 
-2. **Generate synthetic data and ingest**:
-   ```bash
-   # Generates 80 invoices and 5 policy PDFs
-   python scripts/generate_synthetic_data.py
+### 3. Launch with Docker Compose
+```bash
+docker compose up -d
+```
+Verify container statuses:
+```bash
+docker compose ps
+```
+*(Note: `docker-compose.yml` automatically overrides `DATABASE_URL` to route to the `db` service container and `OLLAMA_HOST` to `http://host.docker.internal:11434`, while native host runs like `python ask.py` continue using `localhost` from `.env`.)*
 
-   # Indexes invoices into DB and embeds policy chunks
-   python scripts/ingest_data.py
-   ```
+### 4. Load Policy Documents & Invoices
+To populate PostgreSQL with the policy chunks and invoices, run:
+```bash
+docker compose exec api python scripts/ingest_data.py
+```
+*(Or locally: `python scripts/ingest_data.py`)*
 
-3. **Run CLI RAG assistant**:
-   ```bash
-   # Single query:
-   python ask.py "What is our payment policy?"
-
-   # Run the 10-question CLI verification suite:
-   python ask.py --test
-   ```
-
-4. **Launch the FastAPI Server & Interactive UI**:
-   ```bash
-   python app/api/main.py
-   ```
-   Open [http://localhost:8000](http://localhost:8000) in your browser.
+### 5. Run CLI Assistant (Local Python)
+```bash
+python ask.py "What is the payment period?"
+python ask.py "What are the payment terms for Vendor ABC Corp, and how many of its invoices are unpaid?"
+```
 
 ---
 
-### Option B: Run via Docker Compose
+## API Documentation & Examples
 
+The FastAPI server provides OpenAPI documentation at [http://localhost:8000/docs](http://localhost:8000/docs).
+
+### 1. Health Check (`GET /health`)
+Verifies PostgreSQL connectivity, Ollama reachability, model availability, and row counts:
 ```bash
-# Build and launch Postgres (pgvector) and FastAPI
-docker compose up --build -d
+curl -s http://localhost:8000/health
 ```
-The FastAPI dashboard is accessible immediately at [http://localhost:8000](http://localhost:8000).
+```json
+{
+  "status": "healthy",
+  "database_engine": "postgres",
+  "database_connected": true,
+  "ollama_host": "http://host.docker.internal:11434",
+  "ollama_online": true,
+  "models": {
+    "chat_model": "qwen3:8b",
+    "embed_model": "bge-m3",
+    "chat_model_ready": true,
+    "embed_model_ready": true
+  },
+  "chunks_count": 18,
+  "invoices_count": 90
+}
+```
 
----
-
-## API Documentation
-
-### 1. Main Chat Endpoint (`POST /chat`)
-Accepts questions and optional `session_id` for multi-turn history.
+### 2. Raw Vector Retrieval (`POST /search`)
+Direct hybrid retrieval without calling the LLM:
 ```bash
-curl -X POST http://localhost:8000/chat \
+curl -s -X POST http://localhost:8000/search \
   -H "Content-Type: application/json" \
-  -d '{
-    "question": "Is INV-2024-001 overdue, and what is the late fee?",
-    "session_id": "user_session_1"
-  }'
+  -d '{"query": "What is the payment period?", "top_k": 2}'
 ```
 
-### 2. Streaming Chat (`POST /chat/stream`)
-Server-Sent Events (SSE) streaming endpoint.
+### 3. Primary Chat (`POST /chat`)
+Executes the complete dual-path query planner, tool invocation, and deterministic guard pipeline:
 ```bash
-curl -N -X POST http://localhost:8000/chat/stream \
+curl -s -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
-  -d '{"question": "What is our payment policy?"}'
+  -d '{"question": "What are the payment terms for Vendor ABC Corp, and how many of its invoices are unpaid?"}'
 ```
 
-### 3. Raw Vector Retrieval (`POST /search`)
-Used for retrieval evaluation and debugging without LLM calls.
+### 4. Server-Sent Events Streaming (`POST /chat/stream`)
+Real-time status updates followed by answer token chunks and citations:
 ```bash
-curl -X POST http://localhost:8000/search \
+curl -N -s -X POST http://localhost:8000/chat/stream \
   -H "Content-Type: application/json" \
-  -d '{"query": "three-way matching rule", "limit": 3}'
+  -d '{"question": "What is the payment period?"}'
 ```
+**Streaming Guard Tradeoff**:
+Because our deterministic correctness guards (numeric grounding, unanswerable gate, condition appending, data claim guard) inspect the complete synthesized answer against SQL ground truth and cited chunk numbers, `POST /chat/stream` emits status events (`planning`, `retrieving`, `generating`), runs the verification pipeline, and then streams the **verified final answer** in tokens followed by a final event containing verified citations. This prevents partial streaming of unverified hallucinations.
 
-### 4. Upload & Ingest New Policy (`POST /documents/upload`)
-Uploads a PDF, automatically cleans text, chunks via `tiktoken`, and indexes embeddings into the vector store.
+### 5. Document Ingestion (`POST /documents/upload`)
+Uploads and indexes a new policy PDF or invoice CSV:
 ```bash
-curl -X POST http://localhost:8000/documents/upload \
+curl -s -X POST http://localhost:8000/documents/upload \
   -F "file=@data/policies/payment_policy.pdf"
 ```
 
-### 5. Health Check (`GET /health`)
-```bash
-curl http://localhost:8000/health
-# Returns: {"status": "healthy", "database_engine": "postgres|sqlite", "chunks_count": 23, "invoices_count": 80}
-```
-# finance-rag-assistant
+---
+
+## Evaluation Benchmark
+
+The system is evaluated using the automated evaluation harness (`eval/run_eval.py`) across ground-truth suites on PostgreSQL under Config E (`qwen3:8b`, `bge-m3`, hybrid retrieval, auto planner, merged gate). The statistics below are generated directly from the latest evaluation results files:
+
+### Dev Benchmark (`20261031_124054_cfg_e_postgres_dev.json`)
+- **Pass Rate**: **40/40 (100.0%)**
+- **Latency**: Mean 9.4s | p95 14.9s
+- **Ollama Calls per Question**: 0.97
+
+| Category | Passed / Total | Pass Rate |
+| :--- | :--- | :--- |
+| **invoice** | 6/6 | 100.0% |
+| **invoice_notfound** | 1/1 | 100.0% |
+| **mixed** | 4/4 | 100.0% |
+| **policy** | 19/19 | 100.0% |
+| **trap_condition** | 1/1 | 100.0% |
+| **trap_gap** | 2/2 | 100.0% |
+| **unanswerable** | 7/7 | 100.0% |
+
+### Held-out Benchmark (`20261031_124417_cfg_e_postgres_heldout.json`)
+- **Pass Rate**: **22/22 (100.0%)**
+- **Latency**: Mean 8.4s | p95 13.5s
+- **Ollama Calls per Question**: 0.91
+
+| Category | Passed / Total | Pass Rate |
+| :--- | :--- | :--- |
+| **invoice** | 3/3 | 100.0% |
+| **invoice_notfound** | 1/1 | 100.0% |
+| **mixed** | 2/2 | 100.0% |
+| **policy** | 11/11 | 100.0% |
+| **unanswerable** | 5/5 | 100.0% |
+
+---
+
+## Limitations
+
+1. **Synthetic Dataset Scope**:
+   - The policy documents cover 18 distinct sections across 5 corporate finance PDFs, and the database contains 90 synthetic invoices. Real-world corporate deployments feature thousands of documents and millions of ledger transactions that require sharded vector indices and partition pruning.
+2. **Local 8B Model Arithmetic & Phrasing Variations**:
+   - Small local LLMs (e.g. `qwen3:8b`) can exhibit stochastic phrasing variations or conflate sub-fields (such as mistaking "4 overdue invoices" for "total unpaid invoices" prior to guard intervention). The system relies on deterministic post-generation guards to enforce accuracy on numerical counts and financial totals.
+3. **Automated LLM Judge Reliability**:
+   - Standard automated LLM judges were found to be brittle and inconsistent when auditing fine-grained numerical equivalence (e.g. Indian numbering grouping vs. Western notation). As a result, faithfulness verification was audited manually across 38 representative answer pairs to ensure grounding.
+4. **Deterministic Guard Boundaries**:
+   - The guards use deterministic regex parsers and value-unit extractors designed for financial terminology (currencies, percentages, day thresholds). Phrasings outside these patterns may bypass specific check heuristics.
+5. **Development Set Iteration**:
+   - The dev (40 questions) and held-out (22 questions) benchmark sets were utilized during prompt engineering and pipeline debugging. True out-of-distribution evaluation requires testing on unseen policy domains.

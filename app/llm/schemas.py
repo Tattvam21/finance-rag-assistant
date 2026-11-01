@@ -38,8 +38,9 @@ class ChatResponse(BaseModel):
 
 class SearchRequest(BaseModel):
     query: str
+    top_k: Optional[int] = None
+    limit: Optional[int] = 5
     doc_type: Optional[str] = None
-    limit: int = 5
 
 class SearchHit(BaseModel):
     content: str
@@ -55,8 +56,10 @@ class SearchResponse(BaseModel):
 
 class UploadResponse(BaseModel):
     filename: str
-    chunks_created: int
+    chunks_created: int = 0
+    rows_inserted: int = 0
     status: str
+    message: Optional[str] = None
 
 # Legacy schemas for backward compatibility
 class QueryRequest(BaseModel):

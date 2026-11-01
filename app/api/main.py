@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import json
 import shutil
 import logging
 from typing import Optional, List, Dict, Any
@@ -13,6 +14,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from app.db import get_connection, init_db
+from app.config import (
+    OLLAMA_HOST,
+    CHAT_MODEL,
+    EMBED_MODEL,
+    RETRIEVAL_STRATEGY,
+    GATE_MODE,
+    PLANNER_MODE,
+    DB_BACKEND,
+    run_startup_checks,
+    get_ollama_client
+)
 from app.llm.schemas import (
     ChatRequest,
     ChatResponse,
@@ -23,13 +35,13 @@ from app.llm.schemas import (
     QueryRequest,
     QueryResponse
 )
-from app.llm.generate import chat, answer_query
+from app.llm.generate import chat
 from app.llm.history import get_session_history, add_to_session, rewrite_followup_query
 from app.retrieval.search import search_chunks
 from app.ingestion.parse import extract_pages, clean_text
 from app.ingestion.chunk import chunk_page_text
-from app.ingestion.embed import get_embeddings
-from app.tools.invoice_queries import query_invoices, get_invoice_metrics
+from app.ingestion.embed import get_embeddings, get_embedder_spec
+from app.tools.invoice_queries import query_invoices
 
 # -------------------------------------------------------------
 # Setup Logging
@@ -39,7 +51,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
-logger = logging.getLogger("finance_rag")
+logger = logging.getLogger("finance_rag.api")
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data")
 POLICIES_DIR = os.path.join(DATA_DIR, "policies")
@@ -67,83 +79,148 @@ async def log_requests(request: Request, call_next):
     logger.info(f"{request.method} {request.url.path} - Status: {response.status_code} ({duration:.2f}ms)")
     return response
 
-# -------------------------------------------------------------
-# Core Phase 8 API Endpoints
-# -------------------------------------------------------------
+# Standard JSON error response handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.warning(f"HTTP {exc.status_code} on {request.url.path}: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "status_code": exc.status_code}
+    )
 
-from app.config import run_startup_checks, OLLAMA_HOST, CHAT_MODEL, EMBED_MODEL, get_ollama_client
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error on {request.url.path}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error", "error": str(exc), "status_code": 500}
+    )
 
 @app.on_event("startup")
 def on_startup():
     logger.info("Starting Finance RAG API Server...")
-    run_startup_checks()
+    try:
+        run_startup_checks()
+    except Exception as e:
+        logger.warning(f"Startup check warning: {e}")
+
+# -------------------------------------------------------------
+# Core API Endpoints
+# -------------------------------------------------------------
 
 @app.get("/health")
 def health_check():
-    """Checks database connectivity, table statistics, and Ollama server status."""
+    """
+    Checks database connectivity, table statistics, Ollama server status,
+    and availability of required chat and embedding models.
+    """
     ollama_ok = False
     models_available = []
+    chat_model_ready = False
+    embed_model_ready = False
+
     try:
         client = get_ollama_client()
         m_list = client.list()
         ollama_ok = True
         models_available = [m.model for m in m_list.models]
+        chat_model_ready = any(CHAT_MODEL in m for m in models_available)
+        embed_model_ready = any(EMBED_MODEL in m for m in models_available)
     except Exception as e:
-        logger.warning(f"Ollama health ping failed: {e}")
+        logger.warning(f"Ollama health check ping failed: {e}")
 
     try:
-        conn, engine = get_connection()
+        conn, engine = get_connection(backend=DB_BACKEND)
         cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM chunks;")
-        chunks_count = cur.fetchone()[0]
+
+        spec = get_embedder_spec(EMBED_MODEL)
+        table_name = spec.get("table", "chunks_bge")
+        try:
+            cur.execute(f"SELECT COUNT(*) FROM {table_name};")
+            chunks_count = cur.fetchone()[0]
+        except Exception:
+            if engine == "postgres":
+                conn.rollback()
+            cur.execute("SELECT COUNT(*) FROM chunks;")
+            chunks_count = cur.fetchone()[0]
 
         cur.execute("SELECT COUNT(*) FROM invoices;")
         invoices_count = cur.fetchone()[0]
         conn.close()
+        postgres_ok = True
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "database": "unreachable",
+                "error": str(e),
+                "ollama": "healthy" if ollama_ok else "unreachable"
+            }
+        )
 
-        return {
-            "status": "healthy" if ollama_ok else "degraded",
+    all_ready = ollama_ok and chat_model_ready and embed_model_ready and postgres_ok
+    status_str = "healthy" if all_ready else "degraded"
+    status_code = 200 if (postgres_ok and ollama_ok) else 503
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": status_str,
+            "database_engine": engine,
+            "database_connected": postgres_ok,
             "ollama_host": OLLAMA_HOST,
             "ollama_online": ollama_ok,
-            "models_ready": models_available,
-            "database_engine": engine,
+            "models": {
+                "chat_model": CHAT_MODEL,
+                "embed_model": EMBED_MODEL,
+                "chat_model_ready": chat_model_ready,
+                "embed_model_ready": embed_model_ready,
+                "available_models": models_available
+            },
             "chunks_count": chunks_count,
             "invoices_count": invoices_count
         }
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Database connectivity failed: {str(e)}")
+    )
 
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(req: ChatRequest):
     """
     Primary chat endpoint with conversational history rewriting.
-    Routes queries to policy search, invoice lookup, or hybrid execution.
+    Executes the Config E dual-path pipeline via chat().
     """
-    if not req.question.strip():
+    if not req.question or not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
     session_id = req.session_id or "default"
     history = get_session_history(session_id)
-
-    # Rewrite follow-up query if contextual
     rewritten_q = rewrite_followup_query(req.question, history)
 
     t0 = time.time()
     try:
-        resp = chat(rewritten_q)
+        resp = chat(
+            question=rewritten_q,
+            model=CHAT_MODEL,
+            embed_model=EMBED_MODEL,
+            retrieval_strategy=RETRIEVAL_STRATEGY,
+            gate_mode=GATE_MODE,
+            planner=PLANNER_MODE,
+            backend=DB_BACKEND
+        )
         latency = round((time.time() - t0) * 1000, 2)
         resp.latency_ms = latency
 
-        # Save turn to conversation history
         add_to_session(session_id, "user", req.question)
         add_to_session(session_id, "assistant", resp.answer)
 
         logger.info(
-            f"Session: {session_id} | Raw Q: '{req.question}' | Rewritten: '{rewritten_q}' | "
-            f"Route: {resp.route} | Sources: {len(resp.sources)} | Latency: {latency}ms"
+            f"Question: '{req.question}' | Route: {resp.route} | "
+            f"Latency: {latency}ms | Sources: {len(resp.sources)}"
         )
         return resp
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Chat processing error for '{req.question}': {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error generating answer: {str(e)}")
@@ -151,9 +228,13 @@ def chat_endpoint(req: ChatRequest):
 @app.post("/chat/stream")
 def chat_stream_endpoint(req: ChatRequest):
     """
-    Streaming chat endpoint yielding token chunks via Server-Sent Events (SSE).
+    Streaming chat endpoint yielding Server-Sent Events (SSE).
+    Emits status events (planning, retrieving, generating), then streams the verified answer
+    in small chunks, followed by a final event containing sources.
+    The deterministic guards require the complete synthesized text to verify claims;
+    hence, the verified final answer is streamed to preserve correctness guarantees.
     """
-    if not req.question.strip():
+    if not req.question or not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
     session_id = req.session_id or "default"
@@ -161,36 +242,61 @@ def chat_stream_endpoint(req: ChatRequest):
     rewritten_q = rewrite_followup_query(req.question, history)
 
     def event_stream():
-        resp = chat(rewritten_q)
-        # Yield metadata event
-        yield f"event: metadata\ndata: {json.dumps({'route': resp.route, 'sources': resp.sources})}\n\n"
+        yield f"event: status\ndata: {json.dumps({'status': 'planning'})}\n\n"
+        time.sleep(0.01)
 
-        # Stream answer tokens with minor delay simulating generator
+        yield f"event: status\ndata: {json.dumps({'status': 'retrieving'})}\n\n"
+        time.sleep(0.01)
+
+        yield f"event: status\ndata: {json.dumps({'status': 'generating'})}\n\n"
+
+        t0 = time.time()
+        resp = chat(
+            question=rewritten_q,
+            model=CHAT_MODEL,
+            embed_model=EMBED_MODEL,
+            retrieval_strategy=RETRIEVAL_STRATEGY,
+            gate_mode=GATE_MODE,
+            planner=PLANNER_MODE,
+            backend=DB_BACKEND
+        )
+        latency = round((time.time() - t0) * 1000, 2)
+        resp.latency_ms = latency
+
+        # Stream verified answer in small token/word chunks
         words = resp.answer.split(" ")
-        for word in words:
-            yield f"data: {word} \n\n"
+        for i, word in enumerate(words):
+            chunk_text = word + (" " if i < len(words) - 1 else "")
+            yield f"event: chunk\ndata: {json.dumps({'text': chunk_text})}\n\n"
             time.sleep(0.01)
 
-        # Save to history
+        # Final event with sources and metadata
+        yield f"event: final\ndata: {json.dumps({'sources': resp.sources, 'route': resp.route, 'latency_ms': latency})}\n\n"
+
         add_to_session(session_id, "user", req.question)
         add_to_session(session_id, "assistant", resp.answer)
-        yield "event: end\ndata: [DONE]\n\n"
 
-    import json
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 @app.post("/search", response_model=SearchResponse)
 def raw_search_endpoint(req: SearchRequest):
     """
-    Raw vector retrieval endpoint with no LLM synthesis, designed for debugging and evaluation.
+    Raw vector/hybrid retrieval endpoint without LLM synthesis for evaluation and inspection.
     """
-    if not req.query.strip():
+    if not req.query or not req.query.strip():
         raise HTTPException(status_code=400, detail="Search query cannot be empty.")
 
+    k = req.top_k or req.limit or 5
     t0 = time.time()
     try:
-        raw_hits = search_chunks(req.query, doc_type=req.doc_type, limit=req.limit)
-        latency = (time.time() - t0) * 1000
+        raw_hits = search_chunks(
+            query=req.query,
+            doc_type=req.doc_type,
+            limit=k,
+            retrieval_mode=RETRIEVAL_STRATEGY,
+            backend=DB_BACKEND
+        )
+        latency = round((time.time() - t0) * 1000, 2)
         logger.info(f"Raw Search: '{req.query}' | Hits: {len(raw_hits)} | Latency: {latency:.2f}ms")
 
         hits = [
@@ -199,89 +305,190 @@ def raw_search_endpoint(req: SearchRequest):
                 source_file=h["source_file"],
                 page=h["page"],
                 section=h["section"],
-                similarity=h["similarity"]
+                similarity=float(h.get("similarity", 0.0))
             )
             for h in raw_hits
         ]
         return SearchResponse(query=req.query, results=hits, count=len(hits))
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Search retrieval error: {e}", exc_info=True)
+        logger.error(f"Search retrieval error for '{req.query}': {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 @app.post("/documents/upload", response_model=UploadResponse)
 async def upload_document(file: UploadFile = File(...)):
     """
-    Uploads a new policy PDF, runs page extraction, text cleaning, tiktoken chunking,
-    and inserts embeddings into the database.
+    Uploads a PDF or CSV document.
+    Validates file extension and size.
+    For PDF: extracts pages, chunks text, generates embeddings, and inserts into chunks table.
+    For CSV: parses invoice rows and inserts/upserts into invoices table.
     """
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF documents are supported.")
+    filename = file.filename or ""
+    fn_lower = filename.lower()
+    if not (fn_lower.endswith(".pdf") or fn_lower.endswith(".csv")):
+        raise HTTPException(status_code=400, detail="Only PDF and CSV files are supported.")
 
-    dest_path = os.path.join(POLICIES_DIR, file.filename)
+    content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File size exceeds maximum 10MB limit.")
+
     try:
-        with open(dest_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        if fn_lower.endswith(".pdf"):
+            dest_path = os.path.join(POLICIES_DIR, filename)
+            with open(dest_path, "wb") as f_out:
+                f_out.write(content)
 
-        # Ingest document
-        pages = extract_pages(dest_path)
-        new_chunks = []
-        for page_num, raw_text in pages:
-            cleaned = clean_text(raw_text)
-            chunks = chunk_page_text(
-                source_file=file.filename,
-                page=page_num,
-                cleaned_text=cleaned,
-                target_chunk_tokens=500,
-                overlap_tokens=50
+            pages = extract_pages(dest_path)
+            new_chunks = []
+            for page_num, raw_text in pages:
+                cleaned = clean_text(raw_text)
+                chunks = chunk_page_text(
+                    source_file=filename,
+                    page=page_num,
+                    cleaned_text=cleaned,
+                    target_chunk_tokens=500,
+                    overlap_tokens=50
+                )
+                new_chunks.extend(chunks)
+
+            if new_chunks:
+                texts = [c["content"] for c in new_chunks]
+                embs = get_embeddings(texts, model=EMBED_MODEL)
+
+                conn, engine = get_connection(backend=DB_BACKEND)
+                cur = conn.cursor()
+                spec = get_embedder_spec(EMBED_MODEL)
+                tbl = spec.get("table", "chunks_bge")
+
+                if engine == "postgres":
+                    insert_sql = f"""
+                        INSERT INTO {tbl} (source_file, page, section, doc_type, content, embedding)
+                        VALUES (%s, %s, %s, %s, %s, %s);
+                    """
+                    data = [
+                        (c["source_file"], c["page"], c["section"], c["doc_type"], c["content"], embs[i])
+                        for i, c in enumerate(new_chunks)
+                    ]
+                    cur.executemany(insert_sql, data)
+                else:
+                    insert_sql = f"""
+                        INSERT INTO {tbl} (source_file, page, section, doc_type, content, embedding)
+                        VALUES (?, ?, ?, ?, ?, ?);
+                    """
+                    data = [
+                        (c["source_file"], c["page"], c["section"], c["doc_type"], c["content"], json.dumps(embs[i]))
+                        for i, c in enumerate(new_chunks)
+                    ]
+                    cur.executemany(insert_sql, data)
+
+                conn.commit()
+                conn.close()
+
+            logger.info(f"Ingested PDF {filename}: {len(new_chunks)} chunks created in {tbl}.")
+            return UploadResponse(
+                filename=filename,
+                chunks_created=len(new_chunks),
+                rows_inserted=0,
+                status="success",
+                message=f"Successfully indexed {len(new_chunks)} chunks from {filename}."
             )
-            new_chunks.extend(chunks)
 
-        if new_chunks:
-            texts = [c["content"] for c in new_chunks]
-            embs = get_embeddings(texts)
+        else:  # CSV upload
+            import io, csv
+            dest_path = os.path.join(DATA_DIR, filename)
+            with open(dest_path, "wb") as f_out:
+                f_out.write(content)
 
-            conn, engine = get_connection()
+            text_stream = io.StringIO(content.decode("utf-8"))
+            reader = csv.DictReader(text_stream)
+            required_cols = {"invoice_id", "vendor_name", "amount_inr", "status"}
+            if not reader.fieldnames or not required_cols.issubset(set(reader.fieldnames)):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"CSV missing required columns: {required_cols - set(reader.fieldnames or [])}"
+                )
+
+            rows = list(reader)
+            if not rows:
+                raise HTTPException(status_code=400, detail="CSV file contains no data rows.")
+
+            conn, engine = get_connection(backend=DB_BACKEND)
             cur = conn.cursor()
-
             if engine == "postgres":
                 insert_sql = """
-                    INSERT INTO chunks (source_file, page, section, doc_type, content, embedding)
-                    VALUES (%s, %s, %s, %s, %s, %s);
+                    INSERT INTO invoices (invoice_id, vendor_name, invoice_date, due_date, amount_inr, status, payment_date, department, description)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (invoice_id) DO UPDATE SET
+                        vendor_name = EXCLUDED.vendor_name,
+                        amount_inr = EXCLUDED.amount_inr,
+                        status = EXCLUDED.status,
+                        due_date = EXCLUDED.due_date,
+                        payment_date = EXCLUDED.payment_date;
                 """
                 data = [
-                    (c["source_file"], c["page"], c["section"], c["doc_type"], c["content"], embs[i])
-                    for i, c in enumerate(new_chunks)
+                    (
+                        r["invoice_id"],
+                        r["vendor_name"],
+                        r.get("invoice_date"),
+                        r.get("due_date"),
+                        float(r["amount_inr"]),
+                        r["status"],
+                        r.get("payment_date") or None,
+                        r.get("department"),
+                        r.get("description")
+                    )
+                    for r in rows
                 ]
                 cur.executemany(insert_sql, data)
             else:
-                import json
                 insert_sql = """
-                    INSERT INTO chunks (source_file, page, section, doc_type, content, embedding)
-                    VALUES (?, ?, ?, ?, ?, ?);
+                    INSERT OR REPLACE INTO invoices (invoice_id, vendor_name, invoice_date, due_date, amount_inr, status, payment_date, department, description)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """
                 data = [
-                    (c["source_file"], c["page"], c["section"], c["doc_type"], c["content"], json.dumps(embs[i]))
-                    for i, c in enumerate(new_chunks)
+                    (
+                        r["invoice_id"],
+                        r["vendor_name"],
+                        r.get("invoice_date"),
+                        r.get("due_date"),
+                        float(r["amount_inr"]),
+                        r["status"],
+                        r.get("payment_date") or None,
+                        r.get("department"),
+                        r.get("description")
+                    )
+                    for r in rows
                 ]
                 cur.executemany(insert_sql, data)
 
             conn.commit()
             conn.close()
 
-        logger.info(f"Uploaded and ingested {file.filename}: {len(new_chunks)} chunks created.")
-        return UploadResponse(
-            filename=file.filename,
-            chunks_created=len(new_chunks),
-            status="success"
-        )
+            logger.info(f"Ingested CSV {filename}: {len(rows)} invoice rows loaded.")
+            return UploadResponse(
+                filename=filename,
+                chunks_created=0,
+                rows_inserted=len(rows),
+                status="success",
+                message=f"Successfully loaded {len(rows)} invoices from {filename}."
+            )
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Upload failed for {file.filename}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Document upload and ingestion failed: {str(e)}")
+        logger.error(f"Upload failed for {filename}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Document upload and processing failed: {str(e)}")
 
 # Legacy compatibility endpoints
 @app.post("/api/query", response_model=QueryResponse)
 def handle_query_legacy(req: QueryRequest):
-    return answer_query(req.question)
+    resp = chat(req.question)
+    return QueryResponse(question=req.question, route=resp.route or "POLICY_RAG", answer=resp.answer)
 
 @app.get("/api/invoices")
 def list_invoices(
@@ -295,392 +502,27 @@ def list_invoices(
 
 @app.get("/api/metrics")
 def get_metrics():
-    return get_invoice_metrics()
+    res = query_invoices(backend=DB_BACKEND)
+    return {
+        "total_count": res.get("count", 0),
+        "total_amount": res.get("total_amount", 0.0),
+        "status_breakdown": res.get("status_breakdown", {})
+    }
 
 # -------------------------------------------------------------
-# Modern Interactive UI
+# Interactive UI
 # -------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 def serve_ui():
-    html_content = """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance RAG Assistant & Router</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0F172A;
-            --bg-secondary: #1E293B;
-            --bg-card: #182234;
-            --text-primary: #F8FAFC;
-            --text-muted: #94A3B8;
-            --accent: #38BDF8;
-            --accent-glow: rgba(56, 189, 248, 0.15);
-            --border: #334155;
-            --badge-policy: #10B981;
-            --badge-data: #F59E0B;
-            --badge-hybrid: #8B5CF6;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 24px;
-        }
-        .container { max-width: 1050px; margin: 0 auto; }
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-        .logo-group h1 { font-size: 22px; font-weight: 700; color: #fff; }
-        .logo-group p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-        .badge-status {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #34D399;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-        }
-        .input-row { display: flex; gap: 10px; }
-        input[type="text"] {
-            flex: 1;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px var(--accent-glow);
-        }
-        button {
-            background: linear-gradient(135deg, #0284C7, #0369A1);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 0 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        button:hover { opacity: 0.9; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .sample-queries {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 14px;
-        }
-        .sample-pill {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .sample-pill:hover {
-            color: var(--text-primary);
-            border-color: var(--accent);
-        }
-
-        .result-box { display: none; }
-        .result-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .badge.POLICY_RAG { background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid #10B981; }
-        .badge.INVOICE_DATA { background: rgba(245, 158, 11, 0.2); color: #FBBF24; border: 1px solid #F59E0B; }
-        .badge.HYBRID, .badge.TOOL_CALLS { background: rgba(139, 92, 246, 0.2); color: #C084FC; border: 1px solid #8B5CF6; }
-
-        .answer-content {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #E2E8F0;
-            white-space: pre-wrap;
-            margin-bottom: 16px;
-        }
-        .citations-section {
-            border-top: 1px solid var(--border);
-            padding-top: 12px;
-            margin-top: 12px;
-        }
-        .citations-section h4 {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-        .citation-tag {
-            display: inline-block;
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            color: var(--accent);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-right: 6px;
-            margin-bottom: 6px;
-        }
-
-        .table-wrapper {
-            margin-top: 16px;
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        th, td {
-            padding: 10px 14px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        th { background: var(--bg-secondary); color: var(--text-muted); font-weight: 600; }
-        tr:hover { background: rgba(255, 255, 255, 0.02); }
-        .status-badge {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .status-Paid { background: rgba(16, 185, 129, 0.2); color: #34D399; }
-        .status-Pending { background: rgba(56, 189, 248, 0.2); color: #38BDF8; }
-        .status-Overdue { background: rgba(239, 68, 68, 0.2); color: #F87171; }
-        
-        .upload-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .file-input {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <div class="logo-group">
-                <h1>Finance RAG Assistant & Router</h1>
-                <p>Phases 5-8: Numbered Citations, Parameterized SQL Tools, Router, & FastAPI</p>
-            </div>
-            <div class="badge-status" id="health-status">Checking API...</div>
-        </header>
-
-        <div class="card">
-            <div class="input-row">
-                <input type="text" id="question-input" placeholder="Ask a question (e.g. 'Is INV-2024-001 overdue, and what is the late fee?')..." />
-                <button id="ask-btn" onclick="submitQuery()">Ask</button>
-            </div>
-            <div class="sample-queries">
-                <span class="sample-pill" onclick="setQuery('What is our payment policy?')">📋 Payment policy</span>
-                <span class="sample-pill" onclick="setQuery('Show invoices above ₹1 lakh that are unpaid')">💰 Unpaid &gt; ₹1 Lakh</span>
-                <span class="sample-pill" onclick="setQuery('Is INV-2024-001 overdue, and what is the late fee?')">🔀 Mixed: INV-2024-001 + Late fee</span>
-                <span class="sample-pill" onclick="setQuery('What are the payment terms for Vendor ABC Corp?')">🏢 Vendor ABC terms</span>
-                <span class="sample-pill" onclick="setQuery('List overdue invoices for IT department')">💻 IT overdue</span>
-                <span class="sample-pill" onclick="setQuery('What is our policy on cryptocurrency payments?')">🛡️ Anti-hallucination test</span>
-            </div>
-        </div>
-
-        <div class="card result-box" id="result-box">
-            <div class="result-header">
-                <h3 id="result-title">Response</h3>
-                <div>
-                    <span id="route-badge" class="badge"></span>
-                    <span id="latency-tag" style="font-size: 12px; color: var(--text-muted); margin-left: 8px;"></span>
-                </div>
-            </div>
-            <div class="answer-content" id="answer-content"></div>
-            <div id="citations-container" class="citations-section" style="display: none;">
-                <h4>Numbered Citations</h4>
-                <div id="citations-list"></div>
-            </div>
-            <div id="table-container" class="table-wrapper" style="display: none;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Invoice ID</th>
-                            <th>Vendor</th>
-                            <th>Date</th>
-                            <th>Due Date</th>
-                            <th>Amount (INR)</th>
-                            <th>Status</th>
-                            <th>Dept</th>
-                        </tr>
-                    </thead>
-                    <tbody id="invoice-rows"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 style="font-size: 15px; margin-bottom: 8px;">Upload New Policy PDF (POST /documents/upload)</h3>
-            <div class="upload-section">
-                <input type="file" id="pdf-file-input" accept=".pdf" class="file-input" />
-                <button onclick="uploadDocument()" style="padding: 6px 16px; font-size: 13px;">Upload & Ingest</button>
-                <span id="upload-status" style="font-size: 13px; color: var(--accent);"></span>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        fetch('/health')
-            .then(r => r.json())
-            .then(data => {
-                document.getElementById('health-status').innerText = 
-                    `DB: ${data.database_engine.toUpperCase()} (${data.chunks_count} chunks, ${data.invoices_count} invoices)`;
-            })
-            .catch(() => {
-                document.getElementById('health-status').innerText = 'Offline';
-            });
-
-        function setQuery(text) {
-            document.getElementById('question-input').value = text;
-            submitQuery();
-        }
-
-        async function submitQuery() {
-            const input = document.getElementById('question-input');
-            const btn = document.getElementById('ask-btn');
-            const q = input.value.trim();
-            if (!q) return;
-
-            btn.disabled = true;
-            btn.innerText = 'Routing...';
-
-            const resultBox = document.getElementById('result-box');
-            resultBox.style.display = 'block';
-            document.getElementById('answer-content').innerText = 'Processing query...';
-            document.getElementById('citations-container').style.display = 'none';
-            document.getElementById('table-container').style.display = 'none';
-
-            try {
-                const res = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: q })
-                });
-                const data = await res.json();
-
-                const badge = document.getElementById('route-badge');
-                badge.className = `badge ${data.route || 'HYBRID'}`;
-                badge.innerText = data.route || 'ROUTER';
-
-                if (data.latency_ms) {
-                    document.getElementById('latency-tag').innerText = `${data.latency_ms}ms`;
-                }
-
-                document.getElementById('answer-content').innerText = data.answer;
-
-                if (data.sources && data.sources.length > 0) {
-                    const citDiv = document.getElementById('citations-list');
-                    citDiv.innerHTML = '';
-                    data.sources.forEach(src => {
-                        const span = document.createElement('span');
-                        span.className = 'citation-tag';
-                        span.innerText = src;
-                        citDiv.appendChild(span);
-                    });
-                    document.getElementById('citations-container').style.display = 'block';
-                }
-
-                if (data.invoices && data.invoices.length > 0) {
-                    const tbody = document.getElementById('invoice-rows');
-                    tbody.innerHTML = '';
-                    data.invoices.forEach(inv => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td><b>${inv.invoice_id}</b></td>
-                            <td>${inv.vendor_name}</td>
-                            <td>${inv.invoice_date}</td>
-                            <td>${inv.due_date}</td>
-                            <td>₹${Number(inv.amount_inr).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
-                            <td><span class="status-badge status-${inv.status}">${inv.status}</span></td>
-                            <td>${inv.department || '-'}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                    document.getElementById('table-container').style.display = 'block';
-                }
-            } catch (err) {
-                document.getElementById('answer-content').innerText = 'Error: ' + err.message;
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Ask';
-            }
-        }
-
-        async function uploadDocument() {
-            const fileInput = document.getElementById('pdf-file-input');
-            const status = document.getElementById('upload-status');
-            if (!fileInput.files.length) {
-                status.innerText = 'Please select a PDF file first.';
-                return;
-            }
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
-            status.innerText = 'Uploading and ingesting...';
-            try {
-                const res = await fetch('/documents/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                status.innerText = `Ingested ${data.filename}: created ${data.chunks_created} chunks.`;
-            } catch (e) {
-                status.innerText = 'Upload failed: ' + e.message;
-            }
-        }
-    </script>
+    html_path = os.path.join(os.path.dirname(__file__), "index.html")
+    if os.path.exists(html_path):
+        with open(html_path, "r", encoding="utf-8") as f:
+            return f.read()
+    return """<!DOCTYPE html>
+<html>
+<head><title>Finance RAG API</title></head>
+<body style="font-family: sans-serif; padding: 40px; background: #0F172A; color: #F8FAFC;">
+  <h2>Finance RAG & Invoice Assistant API</h2>
+  <p>The API is operational. Visit <a href="/docs" style="color: #38BDF8;">/docs</a> for interactive OpenAPI documentation.</p>
 </body>
-</html>
-"""
-    return HTMLResponse(content=html_content)
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app.api.main:app", host="0.0.0.0", port=8000, reload=True)
+</html>"""
